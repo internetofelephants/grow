@@ -35,8 +35,8 @@ const SPECIES = [
     form: 'conifer', bark: 'furrow', P: { whorls: 34, cone: 0.85, droop: 0.12, lift: 0.55, needle: 1.6, tick: 1 } },
   { id: 'sequoia', name: 'Giant sequoia', sci: 'Sequoiadendron giganteum', H: 76, CW: 20, D: 6, life: 2500, t50: 92, c: 0.8, dt50: 1260, dc: 0.8,
     form: 'conifer', bark: 'furrow', P: { whorls: 28, cone: 0.55, droop: 0.05, lift: 0.5, needle: 2.2, tick: 1 } },
-  { id: 'fir', name: 'Douglas fir', sci: 'Pseudotsuga menziesii', H: 76, CW: 14, D: 1.7, life: 750, t50: 58, c: 0.95,
-    form: 'conifer', bark: 'furrow', P: { whorls: 30, cone: 1.0, droop: 0.2, lift: 0.4, needle: 1.4, tick: 1 } },
+  { id: 'baldcypress', name: 'Bald cypress', sci: 'Taxodium distichum', H: 40, CW: 12, D: 2, life: 500, t50: 31.5, c: 0.8,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.45, nodes: 7, env: 'dome', angLow: 1.35, angHigh: 1.0, depth: 3, spread: 0.7, ratio: 0.7, up: 0.05, jit: 0.7, leafR: 0.11, asp: 0.5, leaf: 'tuft', tuftN: 20, wob: 0.03, flare: 1.8 } },
   { id: 'pine', name: 'White pine', sci: 'Pinus strobus', H: 46, CW: 12, D: 1, life: 200, t50: 47, c: 1.2,
     form: 'conifer', bark: 'furrow', P: { whorls: 16, cone: 0.5, droop: -0.1, lift: 0.35, needle: 1.3, tick: -1, ragged: 0.6 } },
   { id: 'ash', name: 'Mountain ash', sci: 'Eucalyptus regnans', H: 85, CW: 18, D: 2.5, life: 400, t50: 28, c: 1.05,
@@ -64,8 +64,8 @@ const SPECIES = [
     form: 'broad', bark: 'smooth', P: { trunk: 0.22, nodes: 7, env: 'dome', angLow: 1.35, angHigh: 0.75, depth: 3, spread: 0.75, ratio: 0.7, up: 0.06, jit: 0.4, leafR: 0.12, asp: 0.85, leaf: 'cloud' } },
   { id: 'scotspine', group: 'more', name: 'Scots pine', sci: 'Pinus sylvestris', H: 28, CW: 10, D: 0.8, life: 250, t50: 49, c: 1.3,
     form: 'broad', bark: 'furrow', P: { trunk: 0.6, nodes: 5, env: 'round', angLow: 1.2, angHigh: 0.8, depth: 3, spread: 0.8, ratio: 0.7, up: 0.05, jit: 0.9, leafR: 0.13, asp: 0.6, leaf: 'tuft', wob: 0.04 } },
-  { id: 'silverfir', group: 'more', name: 'Silver fir', sci: 'Abies alba', H: 43, CW: 10, D: 1.5, life: 450, t50: 67, c: 1.95,
-    form: 'conifer', bark: 'hatch', P: { whorls: 28, cone: 0.75, droop: 0, lift: 0.4, needle: 1.0, tick: 1 } },
+  { id: 'teak', group: 'more', name: 'Teak', sci: 'Tectona grandis', H: 40, CW: 12, D: 1, life: 200, t50: 12, c: 0.8,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.45, nodes: 6, env: 'dome', angLow: 1.35, angHigh: 0.85, depth: 3, spread: 0.8, ratio: 0.7, up: 0.05, jit: 0.5, leafR: 0.15, asp: 0.8, leaf: 'cloud', ink: 0.85, flare: 1.3 } },
   { id: 'larch', group: 'more', name: 'European larch', sci: 'Larix decidua', H: 36, CW: 10, D: 1, life: 600, t50: 37.5, c: 1.3,
     form: 'conifer', bark: 'furrow', P: { whorls: 18, cone: 0.8, droop: 0.15, lift: 0.45, needle: 0.8, tick: -1, ragged: 0.4 } },
   { id: 'silverbirch', group: 'more', name: 'Silver birch', sci: 'Betula pendula', H: 26, CW: 8, D: 0.4, life: 95, t50: 35.5, c: 1.15,
@@ -378,6 +378,10 @@ function pcircle(x, y, rad, seed, alpha) {
 function drawBroad(tr, st, cx, gy, pxm, alpha) {
   const sp = tr.sp, P = sp.P, sk = tr.sk;
   const sx = st.cw / sp.CW * pxm, sy = st.h / sp.H * pxm, wpx = st.d * pxm;
+  if (P.flare) {
+    const fh = Math.min(sk.segs[0].y2 * 0.2, 2.5) * sy;     // up to 2.5 m of swollen, buttressed base
+    limb(cx, gy, cx, gy - fh, wpx * P.flare, wpx, tr.seed + 3, alpha, sp.bark);
+  }
   sk.segs.forEach((s, i) => {
     const vis = s.birth === 0 ? 1 : clamp((st.g - s.birth) / 0.1, 0, 1);
     if (vis <= 0) return;
@@ -733,6 +737,7 @@ function refreshPicker() {
 }
 
 function toggle(id) {
+  if (pickerLocked()) return;
   if (selected.includes(id)) {
     if (selected.length <= 1) return say('keep at least 1');
     selected = selected.filter(s => s !== id);
@@ -754,7 +759,20 @@ playBtn.onclick = () => {
   setPlaying(!playing);
   playBtn.blur();
 };
-$('#restart').onclick = e => { year = 0; setPlaying(true); e.target.blur(); };
+// Reset clears the run (keeping the chosen trees) so new trees can be picked before playing again.
+$('#reset').onclick = e => { year = 0; setPlaying(false); e.target.blur(); };
+
+// Once a run has started (playing, paused or finished), the trees can't be changed until Reset:
+// adding a tree mid-run would show it fully grown and give the game away.
+const pickerLocked = () => playing || year > 0;
+let lockedShown = null;
+function syncPickerLock() {
+  const locked = pickerLocked();
+  if (locked === lockedShown) return;
+  lockedShown = locked;
+  document.querySelectorAll('#picker button').forEach(b => { b.disabled = locked; });
+  $('#picker').title = locked ? 'Press Reset to choose different trees' : '';
+}
 
 const SPEEDS = [1, 5, 20];
 for (const s of SPEEDS) {
@@ -822,7 +840,9 @@ function frame(t) {
     if (year >= maxYear()) { year = maxYear(); setPlaying(false); }
   }
   render(dt);
-  $('#year').textContent = `year ${Math.floor(year).toLocaleString()}`;
+  const y = Math.floor(year);
+  $('#year').textContent = `${y.toLocaleString()} year${y === 1 ? '' : 's'}`;
+  syncPickerLock();
   if (!scrubbing) scrub.value = year;
   requestAnimationFrame(frame);
 }

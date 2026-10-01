@@ -15,9 +15,9 @@ Forest Service. Chapters:
 - Weatherspoon, C. P. *Sequoiadendron giganteum* (Giant Sequoia). Vol. 1.
   [Link](https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_1/sequoiadendron/giganteum.htm)
   · Used for: giant sequoia height and diameter by age, mature height, lifespan.
-- Hermann, R. K. & Lavender, D. P. *Pseudotsuga menziesii* (Douglas-Fir). Vol. 1.
-  [Link](https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_1/pseudotsuga/menziesii.htm)
-  · Used for: Douglas fir height growth, old-growth height and diameter, lifespan.
+- Wilhite, L. P. & Toliver, J. R. *Taxodium distichum* (Baldcypress). Vol. 1.
+  [Link](https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_1/taxodium/distichum.htm)
+  · Used for: bald cypress height by age, mature size, age.
 - Wendel, G. W. & Smith, H. C. *Pinus strobus* (Eastern White Pine). Vol. 1.
   [Link](https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_1/pinus/strobus.htm)
   · Used for: white pine height growth, site index, mature size, lifespan.
@@ -37,7 +37,6 @@ Administration's collection.
 - Wiedemann (1936/42), Norway spruce, moderate thinning: Norway spruce
 - Wiedemann (1931), European beech, moderate thinning: European beech
 - Wiedemann (1943), Scots pine, moderate thinning: Scots pine
-- Hausser (1956), silver fir, moderate thinning: silver fir
 - Schober (1946), European larch, moderate thinning: European larch
 - Schwappach (1903/29), birch: silver birch
 - Mitscherlich (1945), black alder, heavy thinning: black alder
@@ -53,8 +52,6 @@ Chapters used:
   [PDF](https://forest.jrc.ec.europa.eu/media/atlas/Fagus_sylvatica.pdf) · European beech height, lifespan
 - *Pinus sylvestris in Europe: distribution, habitat, usage and threats* (Houston Durrant, T., de Rigo, D. & Caudullo, G.)
   [PDF](https://forest.jrc.ec.europa.eu/media/atlas/Pinus_sylvestris.pdf) · Scots pine average height
-- *Abies alba in Europe: distribution, habitat, usage and threats*
-  [PDF](https://forest.jrc.ec.europa.eu/media/atlas/Abies_alba.pdf) · silver fir lifespan in good habitats, height
 - *Larix decidua and other larches in Europe: distribution, habitat, usage and threats*
   [PDF](https://forest.jrc.ec.europa.eu/media/atlas/Larix_decidua.pdf) · European larch height, lifespan
 - *Alnus glutinosa in Europe: distribution, habitat, usage and threats*
@@ -71,10 +68,6 @@ Chapters used:
   Forestry Science* 44: 27.
   [Link](https://nzjforestryscience.springeropen.com/articles/10.1186/s40490-014-0027-2)
   · Used for: kauri height by age.
-- Bledý, M., Vacek, S., Brabec, P., Vacek, Z., Cukor, J., Černý, J., Ševčík, R. & Brynychová, K., 2024.
-  Silver fir (*Abies alba* Mill.): review of ecological insights, forest management strategies, and
-  climate change's impact on European forests. *Forests* 15(6): 998.
-  [Link](https://www.mdpi.com/1999-4907/15/6/998) · Used for: silver fir lifespan.
 - Souza, T., Dobner, M., Batista, D. S., Araujo, D. J., Nascimento, G. S. & da Silva, L. J. R., 2024.
   Site quality for *Araucaria angustifolia* plantations with subtropical Cambisol is driven by soil
   organism assemblage and the litter and soil compartments. *Forests* 15(3): 510.
@@ -82,6 +75,12 @@ Chapters used:
 
 ## Extension and horticultural publications
 
+- Weaver, P. L., 1993. *Tectona grandis L. f. Teak*. SO-ITF-SM-64. Río Piedras, PR: USDA Forest Service,
+  International Institute of Tropical Forestry.
+  [PDF](https://research.fs.usda.gov/download/treesearch/30352.pdf)
+  · Used for: teak height by age (Caribbean site classes), mature height in its native range.
+- Pandey, D. & Brown, C., 2000. Teak: a global overview. *Unasylva* 201. FAO.
+  [Link](https://www.fao.org/4/x4565e/x4565e03.htm) · Used for: teak bole height, rotation ages.
 - Gilman, E. F., Hilbert, D., Watson, D. G., Klein, R., Koeser, A. & McLean, D. C., 2018.
   *Salix babylonica: Weeping Willow*. ENH-734/ST576. University of Florida IFAS Extension.
   [Link](https://ask.ifas.ufl.edu/publication/st576) · Used for: weeping willow height, spread, lifespan.
@@ -127,8 +126,6 @@ Chapters used:
   [*Pinus longaeva*](https://conifers.org/pi/Pinus_longaeva.php) ·
   [*Araucaria angustifolia*](https://www.conifers.org/ar/Araucaria_angustifolia.php)
   · Used for: bristlecone pine height, trunk and age; Paraná pine height and trunk.
-- Trees and Shrubs Online. *Abies alba*.
-  [Link](https://www.treesandshrubsonline.org/articles/abies/abies-alba) · Used for: silver fir height and trunk diameter.
 - Ebben Nurseries. *Sequoiadendron giganteum*.
   [Link](https://www.ebben.nl/en/treeebb/segigant-sequoiadendron-giganteum/) · Used for: giant sequoia crown width in cultivation.
 - Gardening Know How. *Lombardy poplar trees*.

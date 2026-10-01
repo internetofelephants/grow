@@ -26,7 +26,7 @@ Confidence: **●** well sourced · **◐** partly sourced or interpreted · **�
 |---|---|---|---|---|---|
 | Coast redwood | 90 m ● | 18 m ◐ | 4 m ● | 600 ◐ | 10 y 4 → 4.1 · 50 y 38 → 35 · 100 y 59 → 64 |
 | Giant sequoia | 76 m ● | 20 m ○ | 6 m ● | 2,500 ● | 50 y 30 → 26 · 400 y 34–73 → 70 · 1,000 y 74 → 76 |
-| Douglas fir (coast) | 76 m ● | 14 m ○ | 1.7 m ● | 750 ◐ | 50 y 34 → 34 · 100 y 52 → 53 · 400 y 76 → 75 |
+| Bald cypress | 40 m ◐ | 12 m ○ | 2.0 m ◐ | 500 ◐ | 31 y 21.6 → 19.8 · 41 y 21 → 23.3 · 96 y 36.3 → 33.8 (rms 8.8%) |
 | White pine | 46 m ● | 12 m ◐ | 1.0 m ● | 200 ● | 15 y 8 → 8 · 50 y 24 → 24 · 200 y 44 → 44 |
 | Mountain ash | 85 m ● | 18 m ○ | 2.5 m ● | 400 ● | 8 y 15 → 15 · 22 y 33 → 36 |
 | English oak | 31.5 m ● | 22 m ◐ | 2.0 m ◐ | 600 ● | Jüttner 1955 yield table, class II: 45 y 13.3 → 13.1 · 105 y 23.3 → 23.8 · 200 y 30.2 → 29.6 (rms 1.6%) |
@@ -53,9 +53,13 @@ years, oldest 3,200. Old-growth d.b.h. 0.48 m at 100, 1.32 at 400, 2.19 at 800 a
 mature tree is an estimate (○). *Changed:* height 80 → 76,
 lifespan 3,000 → 2,500, crown 24 → 20.
 
-**Douglas fir (coastal).** Silvics: 76 m and 1.5–1.8 m d.b.h. common in old growth; ages over 500
-not uncommon, some over 1,000, oldest ~1,400. Heights use McArdle site class II (~52 m at 100).
-*Changed:* height 70 → 76, trunk 2.2 → 1.7.
+**Bald cypress.** (Replaced Douglas fir.) Silvics: plantation dominants 21.6 m at 31 years and 21 m at
+41 (two different plantations, which is why the fit is only within ~9%); crop trees 36.3 m at 96; height
+growth stops at about 200 years, after which many die back slowly from the top. In virgin forests the
+largest trees were 43–46 m tall and 2.15–3.65 m d.b.h. (40 m and 2 m used for a typical old tree).
+Trees 400–600 years old were reported as common in virgin stands, but Silvics warns that ring counts in
+this species can overstate age (false rings; counts averaged 1.6 × the true age in one study), so 500 is
+◐. Drawn with a swollen, buttressed base.
 
 **White pine.** Silvics: commonly reaches 200 years, max over 450; 46 m and 1 m d.b.h. were common
 in virgin forest; site index (height at 50) typically 18–37 m (24 m used); peak growth ~1 m/yr
@@ -105,8 +109,8 @@ judgement between those figures. *Changed:* height 12 → 10, lifespan 4,000 →
 
 ## More trees from other countries (second row)
 
-Chosen because each has **published height-by-age data** plus a typical height and lifespan.
-The eight European trees use the classic German **yield tables**, which give the stand's mean
+Chosen because each has **published height-by-age data** plus a typical height and lifespan (teak, added later, has no sourced lifespan; see below).
+The seven European trees use the classic German **yield tables**, which give the stand's mean
 height every 5 years for each site class (I–V). For each tree I used the site class whose heights
 lead to the typical mature height given in the EU's *European Atlas of Forest Tree Species*.
 Yield tables stop at 80–150 years, so the final height (H) is fitted along with the curve
@@ -118,20 +122,18 @@ slimmer than open-grown trees.
 | Norway spruce | 40 m ● | 9 m ○ | 1.0 m ◐ | 250 ● | Wiedemann 1936/42, class I: 50 y 21.2 → 20.7 · 120 y 35.9 → 35.8 (rms 1.3%) |
 | European beech | 41 m ● | 18 m ○ | 1.2 m ◐ | 225 ● | Wiedemann 1931, class I.5: 60 y 20.3 → 20.2 · 140 y 35.6 → 35.3 (rms 0.4%) |
 | Scots pine | 28 m ● | 10 m ○ | 0.8 m ○ | 250 ● | Wiedemann 1943, class II.5: 55 y 15.5 → 15.4 · 140 y 25.2 → 25.3 (rms 0.5%) |
-| Silver fir | 43 m ● | 10 m ○ | 1.5 m ◐ | 450 ● | Hausser 1956, class I: 60 y 19.0 → 19.0 · 150 y 37.2 → 37.3 (rms 0.4%) |
 | European larch | 36 m ● | 10 m ○ | 1.0 m ○ | 600 ◐ | Schober 1946, class I.5: 50 y 22.4 → 22.5 · 140 y 34.8 → 34.6 (rms 0.8%) |
 | Silver birch | 26 m ● | 8 m ○ | 0.4 m ○ | 95 ● | Schwappach 1903/29, class II: 45 y 15.3 → 15.3 · 80 y 20.9 → 21.0 (rms 0.2%) |
 | Black alder | 25 m ● | 8 m ○ | 0.5 m ○ | 60 ● | Mitscherlich 1945, class III: 35 y 12.7 → 12.5 · 90 y 20.3 → 20.0 (rms 0.9%) |
 | European ash | 32 m ● | 15 m ○ | 1.0 m ○ | 200 ● | Wimmenauer 1919/29, class I: 50 y 22.5 → 22.5 · 120 y 31.4 → 31.0 (rms 1.0%) |
 | Kauri (NZ) | 45 m ● | 20 m ○ | 2.5 m ◐ | 800 ◐ | planted kauri, average site: 20 y 8.8 → 9.0 · 50 y 20.4 · 60 y 22.3 · 100 y 28.1 → 30.2 (rms 4.9%) |
+| Teak (South & Southeast Asia) | 40 m ◐ | 12 m ○ | 1.0 m ○ | 200 ○ | Caribbean site class I (Weaver 1993, fig. 3, read from the chart): 10 y 20 → 17.9 · 20 y 26 → 26.5 · 30 y 28.5 → 31.6 (rms 8.8%) |
 | Paraná pine (Brazil) | 30 m ● | 15 m ○ | 1.0 m ● | 200 ● | 30 y 20.8 → 20.8 (good plantation site); fastest growth ~0.9 m/yr, at 15–20 y (model: 13 y) ◐ |
 
 **Norway spruce.** Atlas: up to 50–60 m, trunk up to 150 cm, normally reaches 200–300 years.
 **European beech.** Atlas: commonly 30–40 m, up to 50; typical life span 150–300 years. Trunk typically up to 1.5 m.
 **Scots pine.** Atlas: 23–27 m on average, over 40 m possible; oldest over 750 in Lapland. Woodland
 Trust: "may live for 500 years, although 250 may be more typical on many sites".
-**Silver fir.** To 60 m tall and 2–2.5 m d.b.h. (Trees and Shrubs Online); lifespan 300–600 years
-(review in *Forests*, 2024), 500–600 in cool, moist habitats (atlas). 450 is the middle of 300–600.
 **European larch.** Atlas: reaches 45 m, rarely over 50; lifespan 600–800 years in optimal conditions,
 over 1,000 at high elevation. No source gives an average, so 600 is the low end of the optimal range (◐).
 **Silver birch.** Atlas: 15–25 m, exceptionally 30; commonly lives 90–100 years, rarely 150.
@@ -141,6 +143,13 @@ lifespan (Forestry and Land Scotland: 200). Ash dieback now kills many trees muc
 **Kauri.** Steward, Kimberley, Mason & Dungey (2014), planted kauri across New Zealand: average site index 20.4 m
 (at 50 y), 22.3 m at 60, 28.1 m predicted at 100; height growth flattens toward 45 m; slow for the first
 ~10 years. Normally lives longer than 600 years and many exceed 1,000 (800 used, ◐). Trunk 1–4 m+.
+**Teak.** (Replaced silver fir.) Weaver (1993, USDA International Institute of Tropical Forestry):
+reaches 45 m in its native range with a buttressed trunk at maturity; the Caribbean site chart gives top
+heights of nearly 30 m at 30 years on the best sites, and height growth slows faster there than in
+teak's native range. 40 m is used as the final height, between the Caribbean curves (~30 m) and the
+45 m native maximum (◐). FAO (Pandey & Brown): a tall clean bole of more than 25 m; natural teak forests
+are managed on ~120-year rotations. **No source gives a typical lifespan** (only harvest rotations and
+record trees of several centuries): 200 is unverified (○).
 **Paraná pine.** Typically 25–35 m, trunk 50–120 cm (Gymnosperm Database); 60–115 ft (18–35 m) after
 50–90 years, and "fully mature trees may be 140 to 250 years of age" (Knox, UF/IFAS, 2014); growth is S-shaped,
 fastest at 15–20 years, levelling after ~30 in plantations. In 30-year-old plantations a good site
@@ -149,8 +158,7 @@ has dominant trees over 18.1 m (average site 13.1–18.0 m) (*Forests*, 2024); 2
 **Crown widths and most trunk diameters** for these ten are estimates (○). Yield tables give
 stand diameters, not open-grown ones, and I didn't find reliable crown spreads.
 
-**Considered but left out** for lack of verifiable data: teak (no height-by-age table I could
-confirm), Japanese cedar/sugi (good growth data, but no typical lifespan), Japanese larch (no lifespan),
+**Considered but left out** for lack of verifiable data: Japanese cedar/sugi (good growth data, but no typical lifespan), Japanese larch (no lifespan),
 deodar cedar (no growth curve), baobab (no height-by-age data).
 
 ## Sources
