@@ -1,0 +1,734 @@
+'use strict';
+
+// ---------- utils
+const TAU = Math.PI * 2;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function hash(n) {
+  n |= 0;
+  n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+  n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+  return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
+}
+const fmtM = m => (m < 10 ? m.toFixed(1) : Math.round(m)) + ' m';
+
+const PAPER = '#f3efe5';
+const INK = '#2e2d33';
+
+// ---------- species
+// H: mature height (m), CW: crown width (m), D: trunk diameter in old age (m), life: typical lifespan (years),
+// t50: age at half its mature height, c: curve shape (low = fast start and a long slow finish),
+// dt50/dc: the same for trunk diameter where there's data.
+// Typical values, not records. t50 and c are fitted to published heights at known ages.
+// Sources and the reasoning for each number are in DATA.md.
+const SPECIES = [
+  { id: 'redwood', name: 'Coast redwood', sci: 'Sequoia sempervirens', H: 90, CW: 18, D: 4, life: 600, t50: 64, c: 1.65,
+    form: 'conifer', bark: 'furrow', P: { whorls: 34, cone: 0.85, droop: 0.12, lift: 0.55, needle: 1.6, tick: 1 } },
+  { id: 'sequoia', name: 'Giant sequoia', sci: 'Sequoiadendron giganteum', H: 76, CW: 20, D: 6, life: 2500, t50: 92, c: 0.8, dt50: 1260, dc: 0.8,
+    form: 'conifer', bark: 'furrow', P: { whorls: 28, cone: 0.55, droop: 0.05, lift: 0.5, needle: 2.2, tick: 1 } },
+  { id: 'fir', name: 'Douglas fir', sci: 'Pseudotsuga menziesii', H: 76, CW: 14, D: 1.7, life: 750, t50: 58, c: 0.95,
+    form: 'conifer', bark: 'furrow', P: { whorls: 30, cone: 1.0, droop: 0.2, lift: 0.4, needle: 1.4, tick: 1 } },
+  { id: 'pine', name: 'White pine', sci: 'Pinus strobus', H: 46, CW: 12, D: 1, life: 200, t50: 47, c: 1.2,
+    form: 'conifer', bark: 'furrow', P: { whorls: 16, cone: 0.5, droop: -0.1, lift: 0.35, needle: 1.3, tick: -1, ragged: 0.6 } },
+  { id: 'ash', name: 'Mountain ash', sci: 'Eucalyptus regnans', H: 85, CW: 18, D: 2.5, life: 400, t50: 28, c: 1.05,
+    form: 'broad', bark: 'smooth', P: { trunk: 0.58, nodes: 7, env: 'round', angLow: 0.95, angHigh: 0.35, depth: 3, spread: 0.6, ratio: 0.68, up: 0.2, jit: 0.5, leafR: 0.13, asp: 0.6, leaf: 'cloud', sparse: 0.4 } },
+  { id: 'oak', name: 'English oak', sci: 'Quercus robur', H: 31.5, CW: 22, D: 2, life: 600, t50: 56, c: 1.25,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.3, nodes: 6, env: 'dome', angLow: 1.25, angHigh: 0.5, depth: 3, spread: 0.8, ratio: 0.7, up: 0.1, jit: 0.6, leafR: 0.12, asp: 0.85, leaf: 'cloud' } },
+  { id: 'maple', name: 'Sugar maple', sci: 'Acer saccharum', H: 32, CW: 14, D: 0.85, life: 350, t50: 50, c: 2.7,
+    form: 'broad', bark: 'hatch', P: { trunk: 0.28, nodes: 7, env: 'round', angLow: 1.0, angHigh: 0.35, depth: 3, spread: 0.6, ratio: 0.7, up: 0.2, jit: 0.4, leafR: 0.13, asp: 0.9, leaf: 'cloud' } },
+  { id: 'birch', name: 'Paper birch', sci: 'Betula papyrifera', H: 21, CW: 9, D: 0.35, life: 140, t50: 21, c: 1.4,
+    form: 'broad', bark: 'birch', P: { trunk: 0.22, nodes: 9, env: 'ovoid', angLow: 1.0, angHigh: 0.45, depth: 2, spread: 0.5, ratio: 0.7, up: 0.25, jit: 0.4, leafR: 0.14, asp: 1.0, leaf: 'cloud' } },
+  { id: 'poplar', name: 'Lombardy poplar', sci: "Populus nigra 'Italica'", H: 18, CW: 4, D: 0.8, life: 40, t50: 8, c: 1.65,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.06, nodes: 12, env: 'column', angLow: 0.3, angHigh: 0.12, depth: 2, spread: 0.2, ratio: 0.75, up: 0.5, jit: 0.15, leafR: 0.3, asp: 1.6, leaf: 'cloud' } },
+  { id: 'willow', name: 'Weeping willow', sci: 'Salix babylonica', H: 12, CW: 13, D: 0.9, life: 30, t50: 5, c: 1.4,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.35, nodes: 6, env: 'round', angLow: 1.3, angHigh: 0.6, depth: 3, spread: 0.7, ratio: 0.7, up: 0.1, jit: 0.5, leafR: 0.1, asp: 0.8, leaf: 'weep', weep: 0.55 } },
+  { id: 'palm', name: 'Coconut palm', sci: 'Cocos nucifera', H: 28, CW: 10, D: 0.35, life: 80, t50: 33.5, c: 1.2,
+    form: 'palm', bark: 'rings', P: { lean: 0.12 } },
+  { id: 'apple', name: 'Apple', sci: 'Malus domestica', H: 8, CW: 9, D: 0.4, life: 100, t50: 7.5, c: 1.4,
+    form: 'broad', bark: 'hatch', P: { trunk: 0.3, nodes: 5, env: 'round', angLow: 1.2, angHigh: 0.75, depth: 3, spread: 0.8, ratio: 0.7, up: 0.1, jit: 0.6, leafR: 0.14, asp: 0.85, leaf: 'cloud', fruit: true } },
+  { id: 'bristlecone', name: 'Bristlecone pine', sci: 'Pinus longaeva', H: 10, CW: 8, D: 1.5, life: 3000, t50: 250, c: 1.4,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.22, nodes: 5, env: 'round', angLow: 1.3, angHigh: 0.7, depth: 3, spread: 0.9, ratio: 0.7, up: 0.05, jit: 1.1, leafR: 0.12, asp: 0.8, leaf: 'tuft', wob: 0.08 } },
+  // More trees from other countries (second row of the picker; group: 'more'). Sources in DATA.md.
+  { id: 'spruce', group: 'more', name: 'Norway spruce', sci: 'Picea abies', H: 40, CW: 9, D: 1, life: 250, t50: 48, c: 1.8,
+    form: 'conifer', bark: 'furrow', P: { whorls: 30, cone: 1.0, droop: 0.3, lift: 0.3, needle: 1.2, tick: 1 } },
+  { id: 'beech', group: 'more', name: 'European beech', sci: 'Fagus sylvatica', H: 41, CW: 18, D: 1.2, life: 225, t50: 61, c: 1.6,
+    form: 'broad', bark: 'smooth', P: { trunk: 0.3, nodes: 7, env: 'round', angLow: 1.05, angHigh: 0.4, depth: 3, spread: 0.6, ratio: 0.7, up: 0.2, jit: 0.4, leafR: 0.12, asp: 0.85, leaf: 'cloud' } },
+  { id: 'scotspine', group: 'more', name: 'Scots pine', sci: 'Pinus sylvestris', H: 28, CW: 10, D: 0.8, life: 250, t50: 49, c: 1.3,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.6, nodes: 5, env: 'round', angLow: 1.2, angHigh: 0.8, depth: 3, spread: 0.8, ratio: 0.7, up: 0.05, jit: 0.9, leafR: 0.13, asp: 0.6, leaf: 'tuft', wob: 0.04 } },
+  { id: 'silverfir', group: 'more', name: 'Silver fir', sci: 'Abies alba', H: 43, CW: 10, D: 1.5, life: 450, t50: 67, c: 1.95,
+    form: 'conifer', bark: 'hatch', P: { whorls: 28, cone: 0.75, droop: 0, lift: 0.4, needle: 1.0, tick: 1 } },
+  { id: 'larch', group: 'more', name: 'European larch', sci: 'Larix decidua', H: 36, CW: 10, D: 1, life: 600, t50: 37.5, c: 1.3,
+    form: 'conifer', bark: 'furrow', P: { whorls: 18, cone: 0.8, droop: 0.15, lift: 0.45, needle: 0.8, tick: -1, ragged: 0.4 } },
+  { id: 'silverbirch', group: 'more', name: 'Silver birch', sci: 'Betula pendula', H: 26, CW: 8, D: 0.4, life: 95, t50: 35.5, c: 1.15,
+    form: 'broad', bark: 'birch', P: { trunk: 0.2, nodes: 9, env: 'ovoid', angLow: 0.9, angHigh: 0.4, depth: 2, spread: 0.5, ratio: 0.7, up: 0.25, jit: 0.4, leafR: 0.13, asp: 1.0, leaf: 'weep', weep: 0.12 } },
+  { id: 'alder', group: 'more', name: 'Black alder', sci: 'Alnus glutinosa', H: 25, CW: 8, D: 0.5, life: 60, t50: 35.5, c: 0.8,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.15, nodes: 9, env: 'ovoid', angLow: 1.1, angHigh: 0.5, depth: 2, spread: 0.5, ratio: 0.7, up: 0.15, jit: 0.4, leafR: 0.13, asp: 0.9, leaf: 'cloud' } },
+  { id: 'euash', group: 'more', name: 'European ash', sci: 'Fraxinus excelsior', H: 32, CW: 15, D: 1, life: 200, t50: 32.5, c: 1.7,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.35, nodes: 7, env: 'round', angLow: 0.95, angHigh: 0.35, depth: 3, spread: 0.6, ratio: 0.68, up: 0.25, jit: 0.4, leafR: 0.12, asp: 0.8, leaf: 'cloud', sparse: 0.3 } },
+  { id: 'kauri', group: 'more', name: 'Kauri', sci: 'Agathis australis', H: 45, CW: 20, D: 2.5, life: 800, t50: 62.5, c: 1,
+    form: 'broad', bark: 'smooth', P: { trunk: 0.62, nodes: 6, env: 'round', angLow: 1.2, angHigh: 0.6, depth: 3, spread: 0.7, ratio: 0.7, up: 0.15, jit: 0.6, leafR: 0.12, asp: 0.6, leaf: 'cloud' } },
+  { id: 'parana', group: 'more', name: 'Paraná pine', sci: 'Araucaria angustifolia', H: 30, CW: 15, D: 1, life: 200, t50: 21.5, c: 2.5,
+    form: 'broad', bark: 'furrow', P: { trunk: 0.65, nodes: 6, env: 'cup', angLow: 1.15, angHigh: 0.85, depth: 2, spread: 0.5, ratio: 0.75, up: -0.05, jit: 0.3, leafR: 0.1, asp: 0.5, leaf: 'tuft' } },
+];
+SPECIES.forEach((sp, i) => { sp.seed = 977 * (i + 1) + 13; });
+
+// ---------- growth
+// Chapman-Richards style curve: 0 at birth, 0.5 at t50, levelling off at 1.
+function curve(age, t50, c) {
+  if (age <= 0) return 0;
+  const k = -Math.log(1 - Math.pow(0.5, 1 / c)) / t50;
+  return Math.pow(1 - Math.exp(-k * age), c);
+}
+
+function stateAt(sp, year) {
+  const alive = year < sp.life;
+  const a = Math.min(year, sp.life);
+  const h = Math.max(0.12, sp.H * curve(a, sp.t50, sp.c));
+  const cw = Math.max(0.1, sp.CW * curve(a, sp.t50 * 1.1, 1.2));
+  const d = sp.form === 'palm'
+    ? sp.D * clamp(0.3 + a / 8, 0, 1)                      // palms don't thicken once the trunk is up
+    : Math.max(0.01, sp.D * curve(a, sp.dt50 || Math.min(sp.life * 0.3, sp.t50 * 4), sp.dc || 1.1));
+  const decl = clamp((a - sp.life * 0.85) / (sp.life * 0.15), 0, 1);
+  return { age: year, h, cw, d, g: h / sp.H, decl, fol: alive ? 1 - 0.7 * decl : 0, alive };
+}
+
+// ---------- skeletons (built once per species, in metres at maturity)
+const ENV = {
+  round: u => Math.pow(Math.sin(Math.PI * (0.08 + 0.92 * u)), 0.7),
+  dome: u => Math.pow(Math.sin(Math.PI * (0.2 + 0.8 * u)), 0.6),
+  ovoid: u => Math.pow(Math.sin(Math.PI * (0.1 + 0.9 * u)), 0.9) * (1 - 0.35 * u),
+  column: u => 0.55 + 0.45 * Math.sin(Math.PI * u),
+  cup: u => 0.3 + 0.7 * Math.pow(u, 0.6),          // longest branches at the top (candelabra)
+};
+
+function genBroad(sp) {
+  const P = sp.P, r = mulberry32(sp.seed);
+  const segs = [], tips = [];
+  const add = (x1, y1, x2, y2, w1, w2, depth, birth) => segs.push({ x1, y1, x2, y2, w1, w2, depth, birth });
+  const wob = P.wob || 0.015;
+
+  function sub(x, y, ang, len, depth, w, birth) {
+    const x2 = x + Math.sin(ang) * len, y2 = y + Math.cos(ang) * len;
+    const w2 = w * 0.7;
+    add(x, y, x2, y2, w, w2, depth, birth);
+    if (depth >= P.depth + 1) { tips.push({ x: x2, y: y2, birth: birth + 0.05, depth }); return; }
+    const side = r() < 0.5 ? 1 : -1;
+    let a1 = ang + side * P.spread * (0.3 + 0.3 * r());
+    let a2 = ang - side * P.spread * (0.7 + 0.5 * r());
+    a1 = lerp(a1, 0, P.up) + (r() - 0.5) * P.jit * 0.4;
+    a2 = lerp(a2, 0, P.up) + (r() - 0.5) * P.jit * 0.4;
+    const nb = birth + 0.1 + r() * 0.05;
+    sub(x2, y2, a1, len * P.ratio * (0.9 + r() * 0.2), depth + 1, w2, nb);
+    sub(x2, y2, a2, len * P.ratio * (0.6 + r() * 0.3), depth + 1, w2 * 0.8, nb + 0.03);
+    if (depth >= P.depth) tips.push({ x: x2, y: y2, birth: nb, depth });
+  }
+
+  // trunk, then the main axis up through the crown, with laterals at each node
+  let x = (r() - 0.5) * wob, y = P.trunk, w = 0.82;
+  add(0, 0, x, y, 1, w, 0, 0);
+  const top = 0.97;
+  for (let i = 0; i < P.nodes; i++) {
+    const u0 = i / P.nodes, u1 = (i + 1) / P.nodes;
+    const nx = x + (r() - 0.5) * wob * 2, ny = P.trunk + (top - P.trunk) * u1, nw = lerp(0.82, 0.12, u1);
+    const count = 1 + (r() < 0.6 ? 1 : 0);
+    for (let k = 0; k < count; k++) {
+      const side = (i + k) % 2 ? 1 : -1;
+      const ang = side * lerp(P.angLow, P.angHigh, u0) + (r() - 0.5) * P.jit * 0.5;
+      const len = ENV[P.env](u0) * 0.35 * (0.8 + 0.4 * r());
+      sub(x, y, ang, len, 2, w * 0.6, 0.03 + u0 * 0.05 + r() * 0.04);
+    }
+    add(x, y, nx, ny, w, nw, 1, 0);
+    x = nx; y = ny; w = nw;
+  }
+  tips.push({ x, y, birth: 0, depth: 1 });
+
+  // stretch into the species' mature height and crown width, leaving room for the leaf clusters
+  let mx = 0.01, my = 0.01;
+  for (const s of segs) { mx = Math.max(mx, Math.abs(s.x1), Math.abs(s.x2)); my = Math.max(my, s.y1, s.y2); }
+  const R = sp.CW * P.leafR, Ry = R * P.asp;
+  const fx = (sp.CW / 2 - R) / mx, fy = (sp.H - Ry) / my;
+  for (const s of segs) { s.x1 *= fx; s.x2 *= fx; s.y1 *= fy; s.y2 *= fy; }
+  for (const t of tips) { t.x *= fx; t.y *= fy; }
+  return { segs, tips, R, Ry };
+}
+
+function genConifer(sp) {
+  const P = sp.P, r = mulberry32(sp.seed), wh = [];
+  for (let i = 0; i < P.whorls; i++) {
+    const u = 0.06 + 0.9 * (i + r() * 0.6) / P.whorls;
+    let len = Math.pow(1 - u, P.cone) * (0.8 + r() * 0.3);
+    if (P.ragged) len *= 1 - P.ragged * r() * 0.8;
+    for (const side of [-1, 1]) wh.push({ u, len: len * (0.85 + r() * 0.3), side, ang: P.droop + (r() - 0.5) * 0.25, front: false });
+    // one foreshortened branch pointing at the viewer
+    if (r() < 0.6) wh.push({ u: u + 0.01, len: len * 0.5, side: r() < 0.5 ? -1 : 1, ang: P.droop + 0.2, front: true });
+  }
+  let m = 0;
+  for (const w of wh) m = Math.max(m, w.len);
+  for (const w of wh) w.len *= (sp.CW / 2) / m;
+  return { wh };
+}
+
+const skeletons = {};
+function skeleton(sp) {
+  if (!skeletons[sp.id]) skeletons[sp.id] = sp.form === 'broad' ? genBroad(sp) : sp.form === 'conifer' ? genConifer(sp) : {};
+  return skeletons[sp.id];
+}
+
+// ---------- canvas + paper
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+let dpr = 1, paper = null;
+
+function makePaper(w, h) {
+  const c = document.createElement('canvas');
+  c.width = Math.ceil(w * dpr); c.height = Math.ceil(h * dpr);
+  const g = c.getContext('2d');
+  g.fillStyle = PAPER; g.fillRect(0, 0, c.width, c.height);
+  const r = mulberry32(5);
+  const n = (c.width * c.height) / 700;
+  for (let i = 0; i < n; i++) {
+    g.fillStyle = r() < 0.55 ? `rgba(60,50,30,${0.02 + r() * 0.03})` : 'rgba(255,255,255,0.12)';
+    g.fillRect(r() * c.width, r() * c.height, (1 + r() * 1.5) * dpr, (0.6 + r()) * dpr);
+  }
+  g.lineWidth = dpr * 0.6;
+  for (let i = 0; i < 160; i++) {
+    const x = r() * c.width, y = r() * c.height, a = r() * TAU, l = (6 + r() * 20) * dpr;
+    g.strokeStyle = `rgba(90,80,60,${0.03 + r() * 0.04})`;
+    g.beginPath(); g.moveTo(x, y);
+    g.quadraticCurveTo(x + Math.cos(a + 0.6) * l * 0.5, y + Math.sin(a + 0.6) * l * 0.5, x + Math.cos(a) * l, y + Math.sin(a) * l);
+    g.stroke();
+  }
+  const v = g.createRadialGradient(c.width / 2, c.height / 2, Math.min(c.width, c.height) * 0.35, c.width / 2, c.height / 2, Math.max(c.width, c.height) * 0.75);
+  v.addColorStop(0, 'rgba(120,100,70,0)');
+  v.addColorStop(1, 'rgba(120,100,70,0.10)');
+  g.fillStyle = v; g.fillRect(0, 0, c.width, c.height);
+  return c;
+}
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  paper = makePaper(w, h);
+}
+new ResizeObserver(resize).observe(cv);
+
+// ---------- pencil strokes
+// Every stroke takes a seed so its wobble is the same every frame (no boiling).
+function pline(x1, y1, x2, y2, seed, w = 1, a = 0.85, passes = 2, wob = 1) {
+  const r = mulberry32(seed);
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len, uy = dy / len, nx = -uy, ny = ux;
+  const bowMax = Math.min(3, 0.4 + len * 0.012) * wob;
+  const over = Math.min(3, len * 0.04);
+  ctx.lineWidth = w;
+  for (let p = 0; p < passes; p++) {
+    const o1 = (r() - 0.5) * 0.9 * wob, o2 = (r() - 0.5) * 0.9 * wob;
+    const e1 = (r() * 0.8 - 0.2) * over, e2 = (r() * 0.8 - 0.2) * over;
+    const bow = (r() - 0.5) * 2 * bowMax;
+    const sx = x1 - ux * e1 + nx * o1, sy = y1 - uy * e1 + ny * o1;
+    const ex = x2 + ux * e2 + nx * o2, ey = y2 + uy * e2 + ny * o2;
+    ctx.globalAlpha = a * (p ? 0.5 : 1);
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.quadraticCurveTo((sx + ex) / 2 + nx * bow, (sy + ey) / 2 + ny * bow, ex, ey);
+    ctx.stroke();
+  }
+}
+
+// A tapered trunk or branch: two edges plus shading or bark marks on the right (shadow) side.
+function limb(x1, y1, x2, y2, w1, w2, seed, alpha, bark) {
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+  if (len < 0.4) return;
+  const ux = dx / len, uy = dy / len, nx = -uy, ny = ux;
+  const wm = Math.max(w1, w2);
+  if (wm < 2.5) {
+    pline(x1, y1, x2, y2, seed, Math.max(0.6, (w1 + w2) / 2), alpha, 1);
+    return;
+  }
+  const h1 = w1 / 2, h2 = w2 / 2;
+  pline(x1 + nx * h1, y1 + ny * h1, x2 + nx * h2, y2 + ny * h2, seed, 1, alpha, 2);
+  pline(x1 - nx * h1, y1 - ny * h1, x2 - nx * h2, y2 - ny * h2, seed + 1, 1, alpha, 2);
+  const r = mulberry32(seed + 2);
+  ctx.lineWidth = 0.7;
+  ctx.globalAlpha = alpha * 0.45;
+  ctx.beginPath();
+  const at = t => [x1 + dx * t, y1 + dy * t, lerp(w1, w2, t)];
+  if (bark === 'rings') {
+    const step = Math.max(3, wm * 0.45);
+    for (let s = step * 0.5; s < len; s += step) {
+      const [cx, cy, w] = at(s / len);
+      ctx.moveTo(cx - nx * w / 2, cy - ny * w / 2);
+      ctx.quadraticCurveTo(cx - ux * 1.5, cy - uy * 1.5, cx + nx * w / 2, cy + ny * w / 2);
+    }
+  } else {
+    // hatched shadow down the right side
+    const shade = bark === 'birch' ? 0.18 : bark === 'smooth' ? 0.25 : 0.42;
+    for (let s = 1; s < len; s += 2.6) {
+      const [cx, cy, w] = at(s / len);
+      const ex = cx + nx * w / 2, ey = cy + ny * w / 2;
+      ctx.moveTo(ex, ey);
+      ctx.lineTo(ex - nx * w * shade + ux * 2.5, ey - ny * w * shade + uy * 2.5);
+    }
+    if (bark === 'birch') {
+      for (let k = 0, n = Math.floor(len / 5); k < n; k++) {
+        const [cx, cy, w] = at(r());
+        const o = (r() - 0.5) * 0.7 * w, l = w * (0.12 + r() * 0.2);
+        ctx.moveTo(cx + nx * o, cy + ny * o);
+        ctx.lineTo(cx + nx * (o + l), cy + ny * (o + l));
+      }
+    }
+    if ((bark === 'furrow' || bark === 'smooth') && wm > 6) {
+      const n = bark === 'smooth' ? 1 : Math.min(5, Math.floor(wm / 5));
+      for (let k = 0; k < n; k++) {
+        const o = ((k + 0.5) / n - 0.5) * 0.7 + (r() - 0.5) * 0.08;
+        const steps = Math.max(3, Math.round(len / 8));
+        for (let j = 0; j <= steps; j++) {
+          const t = j / steps, [cx, cy, w] = at(t), wig = (r() - 0.5) * 1.6;
+          const px = cx + nx * (o * w + wig), py = cy + ny * (o * w + wig);
+          j ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+        }
+      }
+    }
+  }
+  ctx.stroke();
+}
+
+// Looping scribble for a mass of leaves.
+function scribble(cx, cy, rx, ry, seed, alpha) {
+  if (rx < 1.2 && ry < 1.2) {
+    ctx.globalAlpha = alpha;
+    ctx.fillRect(cx - 0.8, cy - 0.8, 1.6, 1.6);
+    return;
+  }
+  const r = mulberry32(seed);
+  const n = clamp(Math.round(Math.sqrt(rx * ry) * 0.8) + 2, 2, 12);
+  ctx.globalAlpha = alpha;
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  let a = r() * TAU;
+  ctx.moveTo(cx + Math.cos(a) * rx * 0.5, cy + Math.sin(a) * ry * 0.5);
+  for (let i = 0; i < n; i++) {
+    a += 1.9 + r() * 1.2;
+    const rr = 0.25 + 0.75 * Math.sqrt(r()), ca = a - 0.9, cr = rr + 0.35;
+    ctx.quadraticCurveTo(cx + Math.cos(ca) * rx * cr, cy + Math.sin(ca) * ry * cr, cx + Math.cos(a) * rx * rr, cy + Math.sin(a) * ry * rr);
+  }
+  ctx.stroke();
+}
+
+// Short strokes radiating from a twig end (needle tufts).
+function tuft(cx, cy, rx, ry, seed, alpha, fol) {
+  const r = mulberry32(seed), n = Math.round(5 + 10 * fol);
+  ctx.globalAlpha = alpha;
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const a = r() * TAU, r0 = 0.15 + r() * 0.2;
+    ctx.moveTo(cx + Math.cos(a) * rx * r0, cy + Math.sin(a) * ry * r0);
+    ctx.lineTo(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry);
+  }
+  ctx.stroke();
+}
+
+// Willow strands hanging from a twig.
+function weep(x, y, rx, ry, len, seed, alpha, n) {
+  const r = mulberry32(seed);
+  ctx.globalAlpha = alpha;
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const sx = x + (r() - 0.5) * rx * 1.6, sy = y + (r() - 0.3) * ry;
+    const L = len * (0.5 + r() * 0.6), out = (sx - x) * 0.3 + (r() - 0.5) * 3;
+    ctx.moveTo(sx, sy);
+    ctx.quadraticCurveTo(sx + out, sy + L * 0.4, sx + out * 1.4, sy + L);
+  }
+  ctx.stroke();
+}
+
+function pcircle(x, y, rad, seed, alpha) {
+  const r = mulberry32(seed);
+  ctx.globalAlpha = alpha;
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  const a0 = r() * TAU;
+  ctx.ellipse(x, y, rad * (0.9 + r() * 0.2), rad, r(), a0, a0 + TAU * 1.08);
+  ctx.stroke();
+}
+
+// ---------- trees
+function drawBroad(tr, st, cx, gy, pxm, alpha) {
+  const sp = tr.sp, P = sp.P, sk = tr.sk;
+  const sx = st.cw / sp.CW * pxm, sy = st.h / sp.H * pxm, wpx = st.d * pxm;
+  sk.segs.forEach((s, i) => {
+    const vis = s.birth === 0 ? 1 : clamp((st.g - s.birth) / 0.1, 0, 1);
+    if (vis <= 0) return;
+    if (s.depth >= 2 && st.decl > 0 && hash(tr.seed + i * 31) < st.decl * 0.35 * (s.depth - 1) / P.depth) return;
+    const x1 = cx + s.x1 * sx, y1 = gy - s.y1 * sy;
+    const x2 = cx + lerp(s.x1, s.x2, vis) * sx, y2 = gy - lerp(s.y1, s.y2, vis) * sy;
+    limb(x1, y1, x2, y2, s.w1 * wpx, lerp(s.w1, s.w2, vis) * wpx, tr.seed + i * 7, alpha, s.depth === 0 ? sp.bark : (s.w1 * wpx > 5 ? sp.bark : 'hatch'));
+  });
+  if (st.fol <= 0) return;
+  const fa = alpha * (0.35 + 0.25 * st.fol);
+  sk.tips.forEach((tp, i) => {
+    const vis = tp.birth === 0 ? 1 : clamp((st.g - tp.birth) / 0.1, 0, 1);
+    if (vis <= 0) return;
+    const hs = hash(tr.seed * 3 + i * 101);
+    if (hs > st.fol + 0.001 || (P.sparse && hs < P.sparse * 0.5)) return;
+    const x = cx + tp.x * sx, y = gy - tp.y * sy;
+    const rx = Math.max(1.5, sk.R * sx * vis), ry = Math.max(1.5, sk.Ry * sy * vis);
+    const seed = tr.seed + i * 13;
+    if (P.leaf === 'tuft') { tuft(x, y, rx, ry, seed, fa, st.fol); return; }
+    if (P.leaf === 'weep') {
+      scribble(x, y, rx * 0.7, ry * 0.6, seed, fa * 0.7);
+      const len = Math.min(P.weep * st.h * pxm, gy - y - 2);
+      if (len > 2) weep(x, y, rx, ry, len, seed + 1, fa, Math.round(2 + 3 * st.fol));
+      return;
+    }
+    scribble(x, y, rx, ry, seed, fa);
+    if (rx > 6) scribble(x + rx * 0.2, y + ry * 0.25, rx * 0.6, ry * 0.55, seed + 1, fa * 0.8);   // shadow side
+    if (P.fruit && st.alive && st.age > 5 && hs < 0.35) {
+      const fr = 0.07 * pxm;
+      if (fr > 0.8) pcircle(x + (hs - 0.17) * rx * 3, y + ry * 0.4, fr, seed + 2, alpha * 0.8);
+    }
+  });
+}
+
+function drawConifer(tr, st, cx, gy, pxm, alpha) {
+  const sp = tr.sp, P = sp.P, sk = tr.sk;
+  const sx = st.cw / sp.CW * pxm, sy = st.h / sp.H * pxm, wpx = st.d * pxm;
+  limb(cx, gy, cx, gy - st.h * pxm, wpx, Math.max(0.6, wpx * 0.06), tr.seed, alpha, sp.bark);
+  const lift = P.lift * smooth(st.age / (sp.life * 0.5));   // old conifers shed their lower branches
+  sk.wh.forEach((w, i) => {
+    if (w.u < lift) return;
+    const by = gy - w.u * sp.H * sy, L = w.len * sx;
+    if (L < 0.5) return;
+    const ex = cx + w.side * L * Math.cos(w.ang), ey = by + L * Math.sin(w.ang);
+    const a = alpha * (w.front ? 0.6 : 0.9);
+    pline(cx, by, ex, ey, tr.seed + i * 7, Math.max(0.6, wpx * 0.15 * (1 - w.u)), a, 1);
+    if (st.fol <= 0) return;
+    const m = clamp(Math.round(L / 3), 2, 36);
+    let dx = w.side * (P.tick > 0 ? 0.4 : 0.5), dy = P.tick > 0 ? 1 : -0.8;
+    const dl = Math.hypot(dx, dy); dx /= dl; dy /= dl;
+    const nl = clamp(P.needle * sy, 1.2, 14);
+    ctx.globalAlpha = a * (0.4 + 0.3 * st.fol);
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    for (let j = 1; j <= m; j++) {
+      if (hash(tr.seed + i * 131 + j) > st.fol) continue;
+      const t = j / m, px = lerp(cx, ex, t), py = lerp(by, ey, t);
+      const l = nl * (0.6 + 0.8 * Math.sin(Math.PI * t));
+      ctx.moveTo(px, py);
+      ctx.lineTo(px + dx * l, py + dy * l);
+    }
+    ctx.stroke();
+  });
+}
+
+function drawPalm(tr, st, cx, gy, pxm, alpha) {
+  const sp = tr.sp;
+  const crown = st.cw * pxm;
+  const trunkH = Math.max(0, st.h * pxm - crown * 0.18);
+  const lean = sp.P.lean * trunkH;
+  const pt = u => [cx + lean * u * u, gy - trunkH * u];
+  const w = Math.max(0.8, st.d * pxm);
+  if (trunkH > 1) {
+    for (let i = 0; i < 6; i++) {
+      const [x1, y1] = pt(i / 6), [x2, y2] = pt((i + 1) / 6);
+      limb(x1, y1, x2, y2, w * (i ? 1 : 1.3), w, tr.seed + i * 7, alpha, 'rings');
+    }
+  }
+  if (st.fol <= 0) return;
+  const [tx, ty] = pt(1);
+  const r = mulberry32(tr.seed + 99);
+  const n = Math.round(6 + 8 * st.fol);
+  const fa = alpha * (0.5 + 0.3 * st.fol);
+  for (let k = 0; k < n; k++) {
+    const ang = lerp(-2.3, 2.3, (k + 0.5) / n) + (r() - 0.5) * 0.3;
+    const Lf = crown * 0.55 * (0.8 + 0.3 * r());
+    const c1x = tx + Math.sin(ang) * Lf * 0.5, c1y = ty - Math.cos(ang) * Lf * 0.5 - Lf * 0.25;
+    const ex = tx + Math.sin(ang) * Lf, ey = ty - Math.cos(ang) * Lf * 0.6 + Lf * 0.35;
+    ctx.globalAlpha = fa;
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.quadraticCurveTo(c1x, c1y, ex, ey);
+    // leaflets both sides of the midrib, angled down
+    const m = clamp(Math.round(Lf / 3), 3, 22);
+    for (let j = 2; j <= m; j++) {
+      const t = j / m, it = 1 - t;
+      const bx = it * it * tx + 2 * it * t * c1x + t * t * ex, by = it * it * ty + 2 * it * t * c1y + t * t * ey;
+      let gx = 2 * it * (c1x - tx) + 2 * t * (ex - c1x), gz = 2 * it * (c1y - ty) + 2 * t * (ey - c1y);
+      const gl = Math.hypot(gx, gz) || 1; gx /= gl; gz /= gl;
+      const l = Lf * 0.13 * (1 - t * 0.6);
+      for (const s of [-1, 1]) {
+        ctx.moveTo(bx, by);
+        ctx.lineTo(bx + (gx * 0.5 - gz * s) * l, by + (gz * 0.5 + gx * s) * l + l * 0.5);
+      }
+    }
+    ctx.stroke();
+  }
+  if (st.alive && st.age > 6) {
+    const cr = Math.max(0.9, 0.12 * pxm);
+    for (let k = 0; k < 4; k++) pcircle(tx + (k - 1.5) * cr * 1.8, ty + cr * (1.2 + (k % 2) * 0.8), cr, tr.seed + k, alpha * 0.8);
+  }
+}
+
+function drawTree(tr, st, cx, gy, pxm) {
+  const alpha = st.alive ? 0.9 : 0.55;
+  if (tr.sp.form === 'broad') drawBroad(tr, st, cx, gy, pxm, alpha);
+  else if (tr.sp.form === 'conifer') drawConifer(tr, st, cx, gy, pxm, alpha);
+  else drawPalm(tr, st, cx, gy, pxm, alpha);
+}
+
+// ---------- the sheet: grid, axis, ground, person, labels
+const STEPS = [0.25, 0.5, 1, 2, 5, 10, 20, 50, 100, 200];
+
+function drawGrid(L, R, T, gy, W, pxm) {
+  let si = STEPS.findIndex(s => s * pxm >= 48);
+  if (si < 0) si = STEPS.length - 1;
+  const major = STEPS[si], minor = si > 0 ? STEPS[si - 1] : 0;
+  const fade = minor ? clamp((minor * pxm - 14) / 30, 0, 1) : 0;
+  const right = W - R;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(L, T - 8, right - L, gy - T + 8); ctx.clip();
+  const lines = (step, a, isMinor) => {
+    for (let k = 1; ; k++) {
+      const v = k * step;
+      if (isMinor && Math.abs(v / major - Math.round(v / major)) < 1e-6) continue;
+      const y = gy - v * pxm;
+      if (y < T - 8) break;
+      pline(L, y, right, y, Math.round(v * 1000), 0.7, a, 1, 0.6);
+    }
+    for (let k = 1; ; k++) {
+      const v = k * step;
+      if (isMinor && Math.abs(v / major - Math.round(v / major)) < 1e-6) continue;
+      const x = L + v * pxm;
+      if (x > right) break;
+      pline(x, gy, x, T - 8, Math.round(v * 1000) + 7777, 0.7, a, 1, 0.6);
+    }
+  };
+  if (fade > 0) lines(minor, 0.13 * fade, true);
+  lines(major, 0.24, false);
+  ctx.restore();
+
+  // axis, ticks and labels
+  pline(L, gy + 4, L, T - 10, 31, 1.1, 0.85, 2);
+  ctx.font = '17px Caveat, cursive';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let k = 1; ; k++) {
+    const v = k * major, y = gy - v * pxm;
+    if (y < T - 4) break;
+    pline(L - 6, y, L + 2, y, 400 + k, 1, 0.8, 1);
+    ctx.globalAlpha = 0.8;
+    ctx.fillText(`${v} m`, L - 9, y);
+  }
+}
+
+function drawGround(L, R, gy, W) {
+  pline(L - 8, gy, W - R + 6, gy, 12, 1.2, 0.9, 2, 0.8);
+  const r = mulberry32(21);
+  ctx.globalAlpha = 0.45;
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  for (let x = L + 4; x < W - R; x += 7 + r() * 8) {
+    for (let k = 0; k < 3; k++) {
+      const bx = x + k * 1.5, h = 2 + r() * 4;
+      ctx.moveTo(bx, gy);
+      ctx.lineTo(bx + (r() - 0.5) * 3, gy - h);
+    }
+  }
+  ctx.stroke();
+}
+
+// A 1.75 m person for scale.
+function drawPerson(x, gy, pxm) {
+  const h = 1.75 * pxm, a = 0.8;
+  if (h < 4) { pline(x, gy, x, gy - Math.max(1.5, h), 50, 1, a, 1); return; }
+  const hr = h * 0.075, neck = gy - h + hr * 2, hip = gy - h * 0.47, sh = gy - h * 0.8;
+  pcircle(x, gy - h + hr, hr, 51, a);
+  const lw = Math.max(0.8, h * 0.02);
+  pline(x, neck, x, hip, 52, lw, a, 1);
+  pline(x, hip, x - h * 0.08, gy, 53, lw, a, 1);
+  pline(x, hip, x + h * 0.07, gy, 54, lw, a, 1);
+  pline(x, sh, x - h * 0.11, gy - h * 0.5, 55, lw, a, 1);
+  pline(x, sh, x + h * 0.1, gy - h * 0.52, 56, lw, a, 1);
+}
+
+function drawLabel(tr, st, cx, gy, colW) {
+  const sp = tr.sp, fs = colW < 150 ? 17 : 21;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.globalAlpha = 0.9;
+  ctx.font = `600 ${fs}px Caveat, cursive`;
+  ctx.fillText(sp.name, cx, gy + 26);
+  ctx.globalAlpha = 0.55;
+  ctx.font = `${fs - 4}px Caveat, cursive`;
+  ctx.fillText(sp.sci, cx, gy + 44);
+  ctx.globalAlpha = 0.85;
+  ctx.font = `${fs - 1}px Caveat, cursive`;
+  const s = st.alive
+    ? `${Math.floor(st.age)} yrs · ${fmtM(st.h)}${st.g > 0.97 ? ' · full size' : ''}`
+    : `† died at ${sp.life.toLocaleString()} · reached ${fmtM(st.h)}`;
+  ctx.fillText(s, cx, gy + 66);
+}
+
+// ---------- state
+let selected = ['redwood', 'ash', 'oak', 'birch', 'poplar'];
+let trees = [];
+let year = 0, playing = false, speed = 1, lastT = 0, scrubbing = false;
+const view = { h: 0 };
+
+function buildTrees() {
+  trees = SPECIES.filter(sp => selected.includes(sp.id)).map(sp => ({ sp, sk: skeleton(sp), seed: sp.seed }));
+  scrub.max = maxYear();
+  if (year > maxYear()) year = maxYear();
+}
+const maxYear = () => Math.max(...trees.map(t => t.sp.life)) + 20;
+
+function targetView(colW, plotH) {
+  let h = 0, w = 0;
+  for (const tr of trees) { h = Math.max(h, tr.sp.H); w = Math.max(w, tr.sp.CW); }
+  return Math.max(3, h * 1.12, w * plotH / (colW * 0.92));
+}
+
+function render(dt) {
+  const W = cv.clientWidth, H = cv.clientHeight;
+  if (!W || !H || !paper) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.drawImage(paper, 0, 0, W, H);
+  const L = 58, R = 16, T = 26, B = 80;
+  const gy = H - B, plotH = gy - T;
+  const x0 = L + 34, colW = (W - R - x0) / trees.length;
+  const states = trees.map(tr => stateAt(tr.sp, year));
+  const target = targetView(colW, plotH);
+  view.h = view.h ? view.h + (target - view.h) * (1 - Math.exp(-dt * 4)) : target;
+  const pxm = plotH / view.h;
+
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = INK;
+  ctx.fillStyle = INK;
+  drawGrid(L, R, T, gy, W, pxm);
+  drawGround(L, R, gy, W);
+  drawPerson(L + 17, gy, pxm);
+  trees.forEach((tr, i) => {
+    const cx = x0 + colW * (i + 0.5);
+    drawTree(tr, states[i], cx, gy, pxm);
+    drawLabel(tr, states[i], cx, gy, colW);
+  });
+  ctx.globalAlpha = 1;
+}
+
+// ---------- controls
+const $ = s => document.querySelector(s);
+const scrub = $('#scrub'), playBtn = $('#play');
+let msgTimer = 0;
+
+function say(text) {
+  const m = $('#msg');
+  m.textContent = text;
+  m.classList.add('show');
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => m.classList.remove('show'), 1800);
+}
+
+function buildPicker() {
+  const box = $('#picker');
+  box.innerHTML = '<span class="lbl">pick 3–5 trees:</span>';
+  for (const sp of SPECIES) {
+    if (sp.group === 'more' && !box.querySelector('.row-break')) {
+      const br = document.createElement('span');
+      br.className = 'row-break';
+      box.appendChild(br);
+    }
+    const b = document.createElement('button');
+    b.textContent = sp.name;
+    b.dataset.id = sp.id;
+    b.title = sp.sci;
+    b.onclick = () => { toggle(sp.id); b.blur(); };
+    box.appendChild(b);
+  }
+  const m = document.createElement('span');
+  m.id = 'msg';
+  box.appendChild(m);
+  refreshPicker();
+}
+
+function refreshPicker() {
+  document.querySelectorAll('#picker button').forEach(b => b.classList.toggle('on', selected.includes(b.dataset.id)));
+}
+
+function toggle(id) {
+  if (selected.includes(id)) {
+    if (selected.length <= 3) return say('keep at least 3');
+    selected = selected.filter(s => s !== id);
+  } else {
+    if (selected.length >= 5) return say('5 at most: take one away first');
+    selected.push(id);
+  }
+  refreshPicker();
+  buildTrees();
+}
+
+function setPlaying(p) {
+  playing = p;
+  playBtn.textContent = p ? '❚❚ pause' : '▶ play';
+}
+
+playBtn.onclick = () => {
+  if (!playing && year >= maxYear()) year = 0;
+  setPlaying(!playing);
+  playBtn.blur();
+};
+$('#restart').onclick = e => { year = 0; setPlaying(true); e.target.blur(); };
+
+const SPEEDS = [1, 5, 20];
+for (const s of SPEEDS) {
+  const b = document.createElement('button');
+  b.textContent = s + '×';
+  b.title = `1 second = ${s} year${s > 1 ? 's' : ''}`;
+  b.onclick = () => {
+    speed = s;
+    document.querySelectorAll('#speeds button').forEach(x => x.classList.toggle('on', x === b));
+    b.blur();
+  };
+  if (s === speed) b.classList.add('on');
+  $('#speeds').appendChild(b);
+}
+
+scrub.addEventListener('pointerdown', () => { scrubbing = true; });
+window.addEventListener('pointerup', () => { scrubbing = false; });
+scrub.addEventListener('input', () => { year = +scrub.value; });
+
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space' && e.target.tagName !== 'INPUT') { e.preventDefault(); playBtn.click(); }
+});
+
+function frame(t) {
+  const dt = lastT ? Math.min(0.1, (t - lastT) / 1000) : 0;
+  lastT = t;
+  if (playing) {
+    year += dt * speed;
+    if (year >= maxYear()) { year = maxYear(); setPlaying(false); }
+  }
+  render(dt);
+  $('#year').textContent = `year ${Math.floor(year).toLocaleString()}`;
+  if (!scrubbing) scrub.value = year;
+  requestAnimationFrame(frame);
+}
+
+buildPicker();
+buildTrees();
+resize();
+requestAnimationFrame(frame);
