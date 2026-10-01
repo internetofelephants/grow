@@ -1,6 +1,6 @@
-# How trees grow
+# Grow
 
-A browser visualization: 1–5 trees grow side by side from seed, drawn as pencil sketches on a pencil
+Grow ("A tree growth simulator"), a browser visualization: 1–5 trees grow side by side from seed, drawn as pencil sketches on a pencil
 grid, at 1 second = 1 year (1×, 5×, 20×). You see how fast each grows, how tall each gets relative to the
 others at the same fixed scale, and which outlive which. Repo: https://github.com/internetofelephants/grow
 (the folder is `~/code/tree-growth`; the user owns the repo).
@@ -21,7 +21,9 @@ others at the same fixed scale, and which outlive which. Repo: https://github.co
   handwritten Caveat font (Google Fonts). No colour.
 - Every pencil stroke takes a seed so its wobble is identical every frame (no boiling).
 - HTML controls match: Caveat, hand-drawn borders (the irregular `border-radius`), hatched fill for "on".
-- The scale is **always fixed** (to the tallest selected tree's mature height, also fitted to widths).
+- The scale is **always fixed** during a run (to the tallest selected tree's mature height, also fitted to
+  widths). It is set when the run starts (play or scrub), not while trees are being picked: before the first
+  run it fits every species, and after Reset it stays at the last run's scale until play.
   Don't reveal a tree's full size before it reaches it (no "full size" marks; tooltips show only the
   Latin name). A label gains "full size" at 97% of final height.
 
@@ -33,15 +35,19 @@ others at the same fixed scale, and which outlive which. Repo: https://github.co
 - `REFERENCES.md`: the reference list. **Source of truth for the References tab**: after editing it run
   `python3 tools/build_refs.py`, which rewrites the block between `<!-- refs:start -->` and
   `<!-- refs:end -->` in `index.html` (DATA.md links point to GitHub).
+- `trees.csv`: the spreadsheet of every value the simulation uses, with confidence; linked at the top of
+  the References tab. **Generated**: after changing `SPECIES` or DATA.md's tree tables run
+  `node tools/build_csv.js` (it also warns if DATA.md and main.js disagree).
 - `.claude/launch.json`: dev server `trees-dev` (`python3 -m http.server 8340`, `autoPort`).
 
 ## main.js layout (top to bottom)
-utils → **species** (`SPECIES` table) → **growth** (`curve`, `stateAt`) → **skeletons** (`genBroad`,
+utils → **species** (`SPECIES` table, `FACTS` hover text) → **growth** (`curve`, `stateAt`) → **skeletons** (`genBroad`,
 `genConifer`, `ENV` crown envelopes) → canvas + paper texture → **pencil strokes** (`pline`, `limb`,
 `scribble`, `tuft`, `weep`, `pcircle`) → **trees** (`drawBroad`, `drawConifer`, `drawPalm`, `drawTree`)
 → **the sheet** (grid, axis, ground, 1.75 m person for scale, `labelLines`/`labelRoom`/`drawLabel`) →
 **state** (`selected`, `buildTrees`, `maxYear`, `targetView`, `render`) → **controls** (picker, play,
-reset, speeds, scrub, "Let trees die", picker lock) → **information panel** → `frame`.
+reset, speeds, scrub, "Let trees die", picker lock) → **information panel** → **hover facts** (`updateTip`,
+hit areas in `hits` from `render`) → `frame`.
 
 ## Systems
 **Species.** 23 trees. First row (no `group`): coast redwood, giant sequoia, bald cypress, white pine,
@@ -82,9 +88,14 @@ whorls of branches with needle ticks; old trees shed lower branches (`lift`) and
 over the living crown (`reach`) so they keep full width. Palm: curved ringed trunk, arching fronds,
 coconuts.
 
+**Hover facts.** Pointing at a tree (its column, from the tree's current top down through its label) or
+tapping it shows a pencil-style card with its name and a 2–3 sentence fact from `FACTS`. Facts never
+mention height or lifespan or hint at which tree ends up biggest or oldest; each is sourced in DATA.md
+("Tidbits"). The card is rechecked every frame, since trees grow under a still pointer.
+
 **Information panel.** ? button (top right) or the `?` key opens "Information & guide" with three tabs:
 Instructions (simple how-to, written in `index.html`; it must never hint at which tree grows
-tallest or lives longest), About ("Coming soon"), References (generated). Esc, ?, ✕ or a click outside
+tallest or lives longest), About (the authors' note, written in `index.html`), References (generated). Esc, ?, ✕ or a click outside
 closes it.
 
 ## Running and testing
@@ -98,7 +109,6 @@ closes it.
 - A headless check: run `main.js` in node with a stubbed DOM/canvas to catch errors or slow frames.
 
 ## Open items
-- The About tab is empty, waiting for the user's text.
 - Unverified values: apple lifespan (100), teak lifespan (200), bristlecone growth curve (no
   height-by-age data), most crown widths and many trunk diameters (○ in DATA.md). Beech looks slender
   because its 18 m crown width is an estimate.

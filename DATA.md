@@ -161,5 +161,45 @@ stand diameters, not open-grown ones, and I didn't find reliable crown spreads.
 **Considered but left out** for lack of verifiable data: Japanese cedar/sugi (good growth data, but no typical lifespan), Japanese larch (no lifespan),
 deodar cedar (no growth curve), baobab (no height-by-age data).
 
+## Tidbits (hover facts)
+
+Hovering over a tree shows a 2–3 sentence fact about it (`FACTS` in main.js). They never mention
+height or lifespan, or anything that hints at which tree ends up biggest or oldest. Every claim was
+checked against the source named here (full citations in REFERENCES.md). ● = stated by a primary or
+expert source; ◐ = Wikipedia only (with the sources it cites).
+
+| Tree | Claims and sources | |
+|---|---|---|
+| Coast redwood | Fog ≈40% of moisture; thick bark, tannins vs fire and insects; sprouts from stump/roots as clones (NPS, Redwood) | ● |
+| Giant sequoia | Cones green and closed 20+ years, fire dries them and seed falls (Harvey, NPS); seeds 4–5 mm, scattered groves, western Sierra Nevada (Wikipedia; western slope also CA State Parks) | ● ◐ |
+| Bald cypress | Deciduous, hence "bald"; "Wood Eternal" (Beckett, GCBO); knee function unresolved (Beckett; Secrest Arboretum, OSU) | ● |
+| White pine | Bundles of five; broad arrow, Royal Navy masts; Pine Tree Riot 1772 (Wikipedia: *Pinus strobus*, Pine Tree Riot) | ◐ |
+| Mountain ash | No lignotuber, killed by intense fire, seed released onto ash bed (Wikipedia); rough base sheds in ribbons, smooth upper trunk (PBS *Nature*) | ◐ ● |
+| English oak | Oaks in the UK support 2,300+ species; acorns on long stalks, "pedunculate" (Woodland Trust, oak); jays cache acorns, forgotten ones grow (Woodland Trust, jay) | ● |
+| Sugar maple | Hydraulic lift into dry topsoil, used by shallow-rooted neighbours (Dawson 1993); 40:1 sap to syrup, yellow–orange–red autumn colour (Wikipedia) | ● ◐ |
+| Paper birch | Bark peels in paper-like layers, oily and waterproof; Wabanaki canoes, containers, wigwams (Wikipedia) | ◐ |
+| Lombardy poplar | Male clone selected in Lombardy in the 17th century, grown from cuttings, branches near-parallel to stem (Wikipedia: *Populus nigra*) | ◐ |
+| Weeping willow | Linnaeus, Psalm 137, native to China, Babylon's trees were *Populus euphratica* (Wikipedia: *Salix babylonica*); salicin in willow bark, related to aspirin (Wikipedia: Salicin) | ◐ |
+| Coconut palm | No cambium, stem stops thickening, single bud, palm dies if it dies (Broschat, UF/IFAS); Austronesian sailors from the Philippines to the Americas, at least 300 BCE (Wikipedia: Coconut) | ● ◐ |
+| Apple | *Malus sieversii* the main ancestor, southern Kazakhstan (Wikipedia); not true-to-type from seed, varieties grafted (Bartlett 2017, quoting WSU breeder Kate Evans) | ◐ ● |
+| Bristlecone pine | Needles in fives, stay 40+ years (NPS, Bryce Canyon); narrow strip of living tissue, harsh dry high slopes (Wikipedia: *Pinus longaeva*) | ● ◐ |
+| Norway spruce | Most popular Christmas tree; Stradivari violin tops from Alpine Norway spruce (EU Atlas); Oslo's tree for Trafalgar Square since 1947, WWII thanks (City of Oslo) | ● |
+| European beech | Shady woods, leaf litter stops most plants; often keeps dead leaves in winter (Woodland Trust, beech); "book" from the Germanic word for beech (Etymonline) | ● |
+| Scots pine | Most widespread pine, Spain to the Russian Far East; reddish-orange upper bark (EU Atlas); Scotland's national tree (Trees for Life) | ● |
+| Teak | Oils resist water and pests; boats for 2,000+ years; silica blunts tools; leaves 15–45 cm, shed in dry season (Wikipedia: Teak) | ◐ |
+| European larch | Only deciduous European conifer, yellow in autumn; alphorns; seed cones persist up to 10 years (EU Atlas) | ● |
+| Silver birch | Wind-dispersed winged seeds, pioneer; sap tapped in Eastern Europe (EU Atlas, *Betula*); Finland's national tree, voted 1988 (Mustila Arboretum) | ● |
+| Black alder | Nitrogen fixing with *Frankia*; durable under water, Venice; sticky buds, "glutinosa" (EU Atlas) | ● |
+| European ash | Ash dieback since 1992, has killed most ash in many countries (Atlas says over 90%); tool handles, sports equipment (EU Atlas); Yggdrasil an ash (Wikipedia) | ● ◐ |
+| Kauri | Flaking bark, shed lower branches; kauri gum, varnish, gum-diggers; kauri dieback (Wikipedia: *Agathis australis*) | ◐ |
+| Paraná pine | Not a *Pinus*, Araucariaceae; pinhão winter snack; azure jay disperses; critically endangered, ~97% of habitat lost (Wikipedia: *Araucaria angustifolia*) | ◐ |
+
+Corrections made while checking the first draft: redwood "fairy rings" dropped (not in the source);
+oak's 2,300 species is for oaks across the UK, not one tree; paper birch's betulin and birch-bark
+scrolls dropped; Lombardy poplar dates from the 1600s, not the 1700s; coconut "floats for months and
+still sprouts" replaced (Wikipedia says coconuts couldn't have crossed the Pacific unaided); willow
+salicin is "related to" aspirin (aspirin was first made from meadowsweet's salicin); azure jay
+"burying" seeds changed to "spreading" them; ash dieback "from Asia" dropped (not in the source read).
+
 ## Sources
 The full list, with citations and what each source supports, is in [REFERENCES.md](REFERENCES.md).

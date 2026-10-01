@@ -81,6 +81,34 @@ const SPECIES = [
 ];
 SPECIES.forEach((sp, i) => { sp.seed = 977 * (i + 1) + 13; });
 
+// A short fact shown when hovering over a tree. Never about height or lifespan.
+// Each is checked against the sources listed in DATA.md ("Tidbits").
+const FACTS = {
+  redwood: "Fog supplies about 40% of the water it takes in. Its thick bark and tannin-rich wood protect it from fire and insects. If the trunk is cut or burned, new trees can sprout from the stump or roots as clones.",
+  sequoia: "Its cones can stay green and sealed for twenty years or more, until the heat of a fire dries them and they drop their seeds. The seeds are tiny, just 4–5 mm long. It grows wild only in scattered groves on the western slope of California's Sierra Nevada.",
+  baldcypress: "A conifer that drops its needles in autumn, which is why it's called \"bald\". In swamps its roots send up woody \"knees\" above the water, and scientists still don't agree on what they're for. Its rot-resistant heartwood earned the name \"wood eternal\".",
+  pine: "Its needles grow in bundles of five, one for each letter of \"white\". In colonial New England the finest trees were marked with the King's broad arrow and reserved for Royal Navy masts. Anger over that law led to the Pine Tree Riot of 1772.",
+  ash: "It can't resprout after an intense bushfire, so the fire kills it. But the heat releases its seeds onto the nutrient-rich ash, and a whole new forest springs up at once. Its rough lower bark sheds in long ribbons, leaving the upper trunk smooth and pale.",
+  oak: "In the UK, oaks support more than 2,300 other species. Its acorns hang on long stalks, which gives it its other name, pedunculate oak. Jays hide acorns to eat later, and the ones they forget grow into new oaks.",
+  maple: "It takes about 40 litres of sap to make one litre of maple syrup. In dry spells its deep roots draw up water at night and release it into the dry topsoil, where shallow-rooted neighbours can use it. Its autumn leaves range from yellow through orange to red.",
+  birch: "Its thin white bark peels in paper-like layers. The bark is oily, waterproof and tough, and Indigenous peoples such as the Wabanaki have long used it to make canoes, containers and wigwams.",
+  poplar: "Every Lombardy poplar is a clone of one male tree selected in Lombardy, northern Italy, in the 1600s. Because they're all male, they make no seeds and are grown from cuttings. Its narrow shape comes from branches that grow almost parallel to the trunk.",
+  willow: "Its Latin name, babylonica, is a mistake: Linnaeus thought it was the willow of Psalm 137, \"by the rivers of Babylon\", but it comes from China, and the trees of Babylon were Euphrates poplars. Willow bark contains salicin, a compound related to aspirin.",
+  palm: "A palm has no growth layer under its bark, so its trunk stops thickening while it's young. Every leaf comes from a single bud at the top, and if that bud dies, the palm dies. Austronesian sailors carried coconuts from the Philippines to the Americas over 2,000 years ago.",
+  apple: "Its wild ancestor, Malus sieversii, still grows in southern Kazakhstan. Apples don't grow true from seed: plant a Red Delicious pip and you won't get Red Delicious. So every named variety is grafted, with buds of one tree joined onto the roots of another.",
+  bristlecone: "Its needles grow in fives and can stay on the branch for more than 40 years. On old trees most of the trunk dies back, and a narrow strip of living bark may be all that links the roots to a few live branches. It thrives on dry, rocky high slopes where few other plants can grow.",
+  spruce: "It's Europe's favourite Christmas tree, and every year since 1947 Oslo has sent one to London's Trafalgar Square as thanks for Britain's help in World War II. Stradivari made the tops of his violins from Norway spruce from the Italian Alps.",
+  beech: "Beech woods are so shady, and so thickly carpeted with fallen leaves, that few other plants grow there. The word \"book\" probably comes from the old Germanic word for beech, perhaps from runes carved on beechwood tablets. Beeches often hold on to their dead leaves all winter.",
+  scotspine: "It's the most widespread pine in the world, growing from Spain and Scotland to the far east of Russia. Its upper trunk turns a distinctive reddish orange. It is Scotland's national tree.",
+  teak: "Its wood is rich in natural oils, so it resists water, rot and pests, and it has been used to build boats for over 2,000 years. The wood also contains silica, which quickly blunts saws and chisels. Its leaves can be 45 cm long, and it sheds them in the dry season.",
+  larch: "Europe's only conifer that loses its needles: they turn yellow in autumn and fall. Its tough, durable wood is still used in some Alpine villages to make alphorns, wooden horns 3–4 m long. Its seed cones can stay on the tree for up to 10 years.",
+  silverbirch: "Its light, winged seeds are carried far on the wind, so it's quick to move into open ground. In early spring its rising sap was commonly tapped in Eastern Europe, to drink fresh, ferment into birch wine or boil into syrup. Finland voted it the national tree in 1988.",
+  alder: "Bacteria in its roots fix nitrogen from the air, enriching the wet soils it grows in. Its wood lasts a long time under water and has been used for jetties and underwater supports, for example in Venice. Its young buds are sticky, which gives it the Latin name glutinosa.",
+  euash: "Since the 1990s a fungal disease, ash dieback, has spread across Europe, and in many countries it has killed most of the ash trees. Its strong, flexible wood is still used for tool handles and sports equipment. In Norse myth, Yggdrasil, the tree at the centre of the cosmos, is an ash.",
+  kauri: "It sheds its bark in flakes, which stops vines and other plants from taking hold, and drops its lower branches as it grows, leaving a clean trunk. Its resin, dug up as \"kauri gum\", was prized for varnish and fuelled a gum-digging industry in New Zealand. Today it is threatened by kauri dieback disease.",
+  parana: "It isn't a true pine but an araucaria, a relative of the monkey puzzle tree. Its seeds, pinhão, are a popular winter snack in southern Brazil, and are spread by animals, especially the azure jay. Logging and farming have destroyed about 97% of its habitat, and it is critically endangered.",
+};
+
 // ---------- growth
 // Chapman-Richards style curve: 0 at birth, 0.5 at t50, levelling off at 1.
 function curve(age, t50, c) {
@@ -653,6 +681,7 @@ let trees = [];
 let letDie = true;
 let year = 0, playing = false, speed = 1, lastT = 0, scrubbing = false;
 const view = { h: 0 };
+let hits = [];                          // each tree's hover area on screen, set by render()
 
 function buildTrees() {
   trees = SPECIES.filter(sp => selected.includes(sp.id)).map(sp => ({ sp, sk: skeleton(sp), seed: sp.seed }));
@@ -661,15 +690,17 @@ function buildTrees() {
 }
 const maxYear = () => Math.max(...trees.map(t => t.sp.life)) + 20;
 
+// Fits the scale to the chosen trees. Only used during a run (see render), so choosing trees
+// doesn't give away how big they get; before the first run the scale fits every species.
 function targetView(colW, plotH) {
   let h = 0, w = 0;
-  for (const tr of trees) { h = Math.max(h, tr.sp.H); w = Math.max(w, tr.sp.CW); }
+  for (const sp of pickerLocked() ? trees.map(tr => tr.sp) : SPECIES) { h = Math.max(h, sp.H); w = Math.max(w, sp.CW); }
   return Math.max(3, h * 1.12, w * plotH / (colW * 0.92));
 }
 
 function render(dt) {
   const W = cv.clientWidth, H = cv.clientHeight;
-  if (!W || !H || !paper) return;
+  if (!W || !H || !paper || !paper.width || !paper.height) return;   // a hidden page can leave the paper 0 px
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.globalAlpha = 1;
   ctx.drawImage(paper, 0, 0, W, H);
@@ -678,7 +709,7 @@ function render(dt) {
   const B = Math.max(70, labelRoom(colW));
   const gy = H - B, plotH = gy - T;
   const states = trees.map(tr => stateAt(tr.sp, year));
-  const target = targetView(colW, plotH);
+  const target = pickerLocked() || !view.h ? targetView(colW, plotH) : view.h;   // between runs the scale stays put
   view.h = view.h ? view.h + (target - view.h) * (1 - Math.exp(-dt * 4)) : target;
   const pxm = plotH / view.h;
 
@@ -689,10 +720,12 @@ function render(dt) {
   drawGrid(L, R, T, gy, W, pxm);
   drawGround(L, R, gy, W);
   drawPerson(L + 17, gy, pxm);
-  trees.forEach((tr, i) => {
+  hits = trees.map((tr, i) => {
     const cx = x0 + colW * (i + 0.5);
     drawTree(tr, states[i], cx, gy, pxm);
     drawLabel(tr, states[i], cx, gy, colW);
+    const top = Math.min(gy - states[i].h * pxm - 12, gy - 70);   // the tree as drawn now, plus its label
+    return { sp: tr.sp, x0: cx - colW / 2, x1: cx + colW / 2, y0: top, y1: H };
   });
   ctx.globalAlpha = 1;
 }
@@ -832,6 +865,35 @@ guide.addEventListener('click', e => { if (e.target === guide) closeGuide(); });
 guide.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => guideTab(b.dataset.tab); });
 guideTab('instructions');
 
+// ---------- hover facts: point at a tree (or tap it) to read a short fact about it
+const tip = $('#tip'), tipName = tip.querySelector('b'), tipText = tip.querySelector('span');
+let pointer = null, tipFor = null;
+
+function updateTip() {
+  const r = cv.getBoundingClientRect();
+  const x = pointer && pointer.x - r.left, y = pointer && pointer.y - r.top;
+  const h = pointer && hits.find(h => x >= h.x0 && x < h.x1 && y >= h.y0 && y <= h.y1);
+  if (!h || !guide.hidden) { tip.hidden = true; tipFor = null; return; }
+  if (tipFor !== h.sp) {
+    tipFor = h.sp;
+    tipName.textContent = h.sp.name;
+    tipText.textContent = FACTS[h.sp.id];
+    tip.hidden = false;
+  }
+  // beside the pointer, flipped to stay on screen
+  const w = tip.offsetWidth, ht = tip.offsetHeight, pad = 8;
+  let left = pointer.x + 16, top = pointer.y + 16;
+  if (left + w > innerWidth - pad) left = pointer.x - 16 - w;
+  if (top + ht > innerHeight - pad) top = pointer.y - 16 - ht;
+  tip.style.left = clamp(left, pad, innerWidth - w - pad) + 'px';
+  tip.style.top = clamp(top, pad, innerHeight - ht - pad) + 'px';
+}
+
+cv.addEventListener('pointermove', e => { pointer = { x: e.clientX, y: e.clientY }; });
+cv.addEventListener('pointerdown', e => { pointer = { x: e.clientX, y: e.clientY }; });
+cv.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') pointer = null; });
+window.addEventListener('pointerdown', e => { if (e.target !== cv) pointer = null; });   // a tap elsewhere hides it
+
 function frame(t) {
   const dt = lastT ? Math.min(0.1, (t - lastT) / 1000) : 0;
   lastT = t;
@@ -840,6 +902,7 @@ function frame(t) {
     if (year >= maxYear()) { year = maxYear(); setPlaying(false); }
   }
   render(dt);
+  updateTip();                          // trees grow under a still pointer, so check every frame
   const y = Math.floor(year);
   $('#year').textContent = `${y.toLocaleString()} year${y === 1 ? '' : 's'}`;
   syncPickerLock();

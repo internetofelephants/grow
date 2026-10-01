@@ -4,6 +4,9 @@ Sources used to set and verify the tree data (heights, growth with age, trunk di
 and lifespan). Each was read directly. "Used for" says which trees and values it supports; the
 reasoning behind each number is in [DATA.md](DATA.md).
 
+**The data:** every number the simulation uses, with how confident we are in each, is in the
+spreadsheet [trees.csv](trees.csv) (opens in Excel, Numbers or Google Sheets).
+
 ## Forestry references
 
 **USDA Forest Service. *Silvics of North America*.** Burns, R. M. & Honkala, B. H. (technical
@@ -140,3 +143,66 @@ Chapters used:
   [*Pinus longaeva*](https://en.wikipedia.org/wiki/Pinus_longaeva) (bristlecone pine height and average ages) ·
   [*Agathis australis*](https://en.wikipedia.org/wiki/Agathis_australis) (kauri height and lifespan) ·
   [*Araucaria angustifolia*](https://en.wikipedia.org/wiki/Araucaria_angustifolia) (Paraná pine height, early growth)
+
+## Sources for the tree facts (hover text)
+
+These support the short facts shown when hovering over a tree; which claim each supports is in
+[DATA.md](DATA.md) ("Tidbits").
+
+- National Park Service. *About the Trees* (Redwood National and State Parks).
+  [Link](https://www.nps.gov/redw/learn/nature/about-the-trees.htm) · coast redwood fog, bark, sprouting
+- Harvey, H. T. *Giant Sequoia Ecology*, chapter 5. National Park Service Scientific Monograph 12.
+  [Link](https://npshistory.com/series/science/12/chap5.htm) · giant sequoia cones and fire
+- California State Parks. *Fire and the Giant Sequoia*.
+  [Link](https://learning.parks.ca.gov/topics/nature/fire-and-the-giant-sequoia/) · giant sequoia cones, range
+- Beckett, H. *Bald Cypress (Taxodium distichum)*. Gulf Coast Bird Observatory.
+  [PDF](https://www.gcbo.org/wp-content/uploads/2025/09/Bald-Cypress.pdf) · bald cypress name, knees, "Wood Eternal"
+- Secrest Arboretum, Ohio State University. *Swamp Thing: Baldcypress*.
+  [Link](https://secrest.osu.edu/newsletter/all-things-secrest-0/winter-2025/secrest-select-plant/swamp-thing-baldcypress)
+  · bald cypress knees
+- Dawson, T. E., 1993. Hydraulic lift and water use by plants: implications for water balance,
+  performance and plant-plant interactions. *Oecologia* 95: 565–574.
+  [Link](https://agris.fao.org/search/ar/records/647758eef2e6fe92b365cd60) · sugar maple hydraulic lift
+- Woodland Trust. *English oak*, *Common beech* and *Jay*.
+  [oak](https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/british-trees/a-z-of-british-trees/english-oak/) ·
+  [beech](https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/british-trees/a-z-of-british-trees/common-beech/) ·
+  [jay](https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/animals/birds/jay/)
+  · species on oak, acorns, jays; beech shade and winter leaves
+- PBS *Nature*. *Survivors of the Firestorm: Mountain Ash fact sheet*.
+  [Link](https://www.pbs.org/wnet/nature/survivors-of-the-firestorm-mountain-ash-fact-sheet/6513) · mountain ash bark
+- Broschat, T. K. *Palm Morphology and Anatomy*. ENH1212/EP473. University of Florida IFAS Extension.
+  [Link](https://ask.ifas.ufl.edu/publication/EP473) · palm trunk and bud
+- Bartlett, M., 2017. *Want To Grow An Apple Tree? Don't Start With Apple Seeds*. Northwest Public Broadcasting.
+  [Link](https://www.nwpb.org/2017/05/03/want-to-grow-an-apple-tree-dont-start-with-apple-seeds/)
+  · apples not true-to-type, grafting
+- National Park Service. *Bristlecone Pine* (Bryce Canyon National Park).
+  [Link](https://www.nps.gov/brca/learn/nature/bristleconepine.htm) · bristlecone needles
+- City of Oslo. *The Trafalgar Square Christmas tree*.
+  [Link](https://www.oslo.kommune.no/english/politics/the-city-council/the-mayor/the-trafalgar-square-christmas-tree/)
+  · Norway spruce gift to London
+- *European Atlas of Forest Tree Species* (see above): *Picea abies*, *Pinus sylvestris*, *Larix decidua*,
+  *Alnus glutinosa*, *Fraxinus excelsior*, and *Betula pendula and Betula pubescens*
+  [PDF](https://forest.jrc.ec.europa.eu/media/atlas/Betula_spp.pdf)
+  · spruce, Scots pine, larch, alder, ash and silver birch facts
+- Trees for Life. *Concerted action needed to ensure future of Scotland's national tree*.
+  [Link](https://treesforlife.org.uk/concerted-action-needed-ensure-future-scotlands-national-tree/) · Scots pine
+- Mustila Arboretum. *Betula pendula: European white birch, silver birch*.
+  [Link](https://mustila.fi/en/?p=15364) · Finland's national tree
+- Harper, D. *book*. Online Etymology Dictionary. [Link](https://www.etymonline.com/word/book) · "book" and beech
+- Wikipedia (and the sources it cites):
+  [*Sequoiadendron giganteum*](https://en.wikipedia.org/wiki/Sequoiadendron_giganteum) ·
+  [*Pinus strobus*](https://en.wikipedia.org/wiki/Pinus_strobus) ·
+  [Pine Tree Riot](https://en.wikipedia.org/wiki/Pine_Tree_Riot) ·
+  [*Eucalyptus regnans*](https://en.wikipedia.org/wiki/Eucalyptus_regnans) ·
+  [*Acer saccharum*](https://en.wikipedia.org/wiki/Acer_saccharum) ·
+  [*Betula papyrifera*](https://en.wikipedia.org/wiki/Betula_papyrifera) ·
+  [Lombardy poplar](https://en.wikipedia.org/wiki/Lombardy_poplar) ·
+  [*Salix babylonica*](https://en.wikipedia.org/wiki/Salix_babylonica) ·
+  [Salicin](https://en.wikipedia.org/wiki/Salicin) ·
+  [Coconut](https://en.wikipedia.org/wiki/Coconut) ·
+  [*Malus sieversii*](https://en.wikipedia.org/wiki/Malus_sieversii) ·
+  [*Pinus longaeva*](https://en.wikipedia.org/wiki/Pinus_longaeva) ·
+  [Teak](https://en.wikipedia.org/wiki/Teak) ·
+  [Yggdrasil](https://en.wikipedia.org/wiki/Yggdrasil) ·
+  [*Agathis australis*](https://en.wikipedia.org/wiki/Agathis_australis) ·
+  [*Araucaria angustifolia*](https://en.wikipedia.org/wiki/Araucaria_angustifolia)

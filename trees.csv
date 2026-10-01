@@ -1,0 +1,24 @@
+Tree,Latin name,Row,Mature height (m),Height confidence,Crown width (m),Crown confidence,Trunk d.b.h. (m),Trunk confidence,Typical lifespan (years),Lifespan confidence,"Age at half height (t50, years)",Height curve shape (c),Trunk: age at half diameter (years),Trunk curve shape,"Heights used for the fit (age: source → model, m)"
+Coast redwood,Sequoia sempervirens,first,90,sourced,18,partly sourced,4,sourced,600,partly sourced,64,1.65,default,default,10 y 4 → 4.1 · 50 y 38 → 35 · 100 y 59 → 64
+Giant sequoia,Sequoiadendron giganteum,first,76,sourced,20,estimate,6,sourced,2500,sourced,92,0.8,1260,0.8,"50 y 30 → 26 · 400 y 34–73 → 70 · 1,000 y 74 → 76"
+Bald cypress,Taxodium distichum,first,40,partly sourced,12,estimate,2,partly sourced,500,partly sourced,31.5,0.8,default,default,31 y 21.6 → 19.8 · 41 y 21 → 23.3 · 96 y 36.3 → 33.8 (rms 8.8%)
+White pine,Pinus strobus,first,46,sourced,12,partly sourced,1,sourced,200,sourced,47,1.2,default,default,15 y 8 → 8 · 50 y 24 → 24 · 200 y 44 → 44
+Mountain ash,Eucalyptus regnans,first,85,sourced,18,estimate,2.5,sourced,400,sourced,28,1.05,default,default,8 y 15 → 15 · 22 y 33 → 36
+English oak,Quercus robur,first,31.5,sourced,22,partly sourced,2,partly sourced,600,sourced,56,1.25,default,default,"Jüttner 1955 yield table, class II: 45 y 13.3 → 13.1 · 105 y 23.3 → 23.8 · 200 y 30.2 → 29.6 (rms 1.6%)"
+Sugar maple,Acer saccharum,first,32,sourced,14,partly sourced,0.85,sourced,350,sourced,50,2.7,default,default,40 y 12 → 12 · 150 y 31 → 31
+Paper birch,Betula papyrifera,first,21,sourced,9,partly sourced,0.35,sourced,140,sourced,21,1.4,default,default,50 y 18 → 18 · 70 y ~20 → 20
+Lombardy poplar,Populus nigra 'Italica',first,18,sourced,4,sourced,0.8,estimate,40,sourced,8,1.65,default,default,10 y 12 → 12 · 25 y 19 → 19 ◐
+Weeping willow,Salix babylonica,first,12,sourced,13,sourced,0.9,estimate,30,sourced,5,1.4,default,default,5 y 6 → 6 · 15 y 11 → 11 ◐
+Coconut palm,Cocos nucifera,first,28,partly sourced,10,sourced,0.35,sourced,80,sourced,33.5,1.2,default,default,from trunk growth 0.4 m/yr after year 3.5: 10 y 4.6 → 4.5 · 30 y 12.6 → 12.8 · 80 y 24 → 23.4 ◐
+Apple,Malus domestica,first,8,sourced,9,partly sourced,0.4,estimate,100,estimate,7.5,1.4,default,default,10 y 5 → 5 · 25 y 7.5 → 7.5 ◐
+Bristlecone pine,Pinus longaeva,first,10,sourced,8,partly sourced,1.5,partly sourced,3000,partly sourced,250,1.4,default,default,"no growth data ○ (t50 250, c 1.4)"
+Norway spruce,Picea abies,second (other countries),40,sourced,9,estimate,1,partly sourced,250,sourced,48,1.8,default,default,"Wiedemann 1936/42, class I: 50 y 21.2 → 20.7 · 120 y 35.9 → 35.8 (rms 1.3%)"
+European beech,Fagus sylvatica,second (other countries),41,sourced,18,estimate,1.2,partly sourced,225,sourced,61,1.6,default,default,"Wiedemann 1931, class I.5: 60 y 20.3 → 20.2 · 140 y 35.6 → 35.3 (rms 0.4%)"
+Scots pine,Pinus sylvestris,second (other countries),28,sourced,10,estimate,0.8,estimate,250,sourced,49,1.3,default,default,"Wiedemann 1943, class II.5: 55 y 15.5 → 15.4 · 140 y 25.2 → 25.3 (rms 0.5%)"
+Teak,Tectona grandis,second (other countries),40,partly sourced,12,estimate,1,estimate,200,estimate,12,0.8,default,default,"Caribbean site class I (Weaver 1993, fig. 3, read from the chart): 10 y 20 → 17.9 · 20 y 26 → 26.5 · 30 y 28.5 → 31.6 (rms 8.8%)"
+European larch,Larix decidua,second (other countries),36,sourced,10,estimate,1,estimate,600,partly sourced,37.5,1.3,default,default,"Schober 1946, class I.5: 50 y 22.4 → 22.5 · 140 y 34.8 → 34.6 (rms 0.8%)"
+Silver birch,Betula pendula,second (other countries),26,sourced,8,estimate,0.4,estimate,95,sourced,35.5,1.15,default,default,"Schwappach 1903/29, class II: 45 y 15.3 → 15.3 · 80 y 20.9 → 21.0 (rms 0.2%)"
+Black alder,Alnus glutinosa,second (other countries),25,sourced,8,estimate,0.5,estimate,60,sourced,35.5,0.8,default,default,"Mitscherlich 1945, class III: 35 y 12.7 → 12.5 · 90 y 20.3 → 20.0 (rms 0.9%)"
+European ash,Fraxinus excelsior,second (other countries),32,sourced,15,estimate,1,estimate,200,sourced,32.5,1.7,default,default,"Wimmenauer 1919/29, class I: 50 y 22.5 → 22.5 · 120 y 31.4 → 31.0 (rms 1.0%)"
+Kauri,Agathis australis,second (other countries),45,sourced,20,estimate,2.5,partly sourced,800,partly sourced,62.5,1,default,default,"planted kauri, average site: 20 y 8.8 → 9.0 · 50 y 20.4 · 60 y 22.3 · 100 y 28.1 → 30.2 (rms 4.9%)"
+Paraná pine,Araucaria angustifolia,second (other countries),30,sourced,15,estimate,1,sourced,200,sourced,21.5,2.5,default,default,"30 y 20.8 → 20.8 (good plantation site); fastest growth ~0.9 m/yr, at 15–20 y (model: 13 y) ◐"
