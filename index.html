@@ -101,7 +101,7 @@
   <span id="year">0 years</span>
   <input type="range" id="scrub" min="0" max="100" step="1" value="0" aria-label="Year">
   <label class="check"><input type="checkbox" id="letDie" checked> Let trees die</label>
-  <span class="note">typical values for open-grown trees, from forestry sources</span>
+  <span class="note">typical values from forestry sources</span>
 </footer>
 <div id="guide" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
@@ -114,7 +114,39 @@
       <button role="tab" data-tab="about">About</button>
       <button role="tab" data-tab="references">References</button>
     </div>
-    <div class="panel" role="tabpanel" data-panel="instructions"><p class="empty">Coming soon.</p></div>
+    <div class="panel" role="tabpanel" data-panel="instructions">
+      <h3>Watch trees grow</h3>
+      <p>Choose some trees, press play, and watch them grow side by side from seed. Every second is a year of
+        their lives.</p>
+      <h3>How to use it</h3>
+      <ul>
+        <li><strong>Pick 1 to 5 trees</strong> from the buttons at the top. The second row has trees from other
+          parts of the world.</li>
+        <li><strong>Press ▶ play.</strong> Each second is one year. Use <strong>1×, 5× or 20×</strong> to speed
+          time up; some trees live for thousands of years.</li>
+        <li><strong>Pause</strong> at any time, or drag the slider to move through the years.</li>
+        <li><strong>Reset</strong> clears the trees back to seed. Your trees stay chosen, and you can pick
+          different ones. (Trees can't be changed while they're growing, so nothing gives away how big a tree
+          gets.)</li>
+        <li><strong>Let trees die</strong>: leave it ticked to see each tree die at the end of a typical
+          lifespan. Untick it to keep every tree alive, so you can compare them all at full size; a note shows
+          when each one would have died.</li>
+      </ul>
+      <h3>Reading the picture</h3>
+      <ul>
+        <li>All the trees are drawn to the same scale, in metres. The little figure by the axis is a person,
+          1.75 m tall.</li>
+        <li>Under each tree is its name, its scientific name and its height. "Full size" means it has nearly
+          finished growing taller.</li>
+        <li>The heights, growth and lifespans are typical values from forestry research. Real trees vary a lot
+          with soil, climate and luck. The sources are in References.</li>
+      </ul>
+      <h3>Keys</h3>
+      <ul>
+        <li><strong>Space</strong>: play or pause</li>
+        <li><strong>?</strong>: open or close this panel · <strong>Esc</strong>: close it</li>
+      </ul>
+    </div>
     <div class="panel" role="tabpanel" data-panel="about" hidden><p class="empty">Coming soon.</p></div>
     <div class="panel" role="tabpanel" data-panel="references" hidden>
 <!-- refs:start (generated from REFERENCES.md by tools/build_refs.py; edit REFERENCES.md, then rerun it) -->
