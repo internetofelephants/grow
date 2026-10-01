@@ -44,12 +44,49 @@
   input[type=range]::-moz-range-track { height: 2px; background: rgba(46,45,51,.55); }
   input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); }
   .note { font-size: 17px; color: var(--soft); }
+
+  /* "Let trees die" checkbox: a hand-drawn box with a pencil tick */
+  .check { display: inline-flex; align-items: center; gap: 6px; font-size: 20px; cursor: pointer; user-select: none; }
+  .check input {
+    -webkit-appearance: none; appearance: none; margin: 0; width: 17px; height: 17px; cursor: pointer;
+    border: 1.5px solid rgba(46,45,51,.6); border-radius: 3px 5px 2px 6px / 6px 2px 5px 3px; background: transparent;
+    display: grid; place-content: center;
+  }
+  .check input::after { content: '✓'; font-size: 17px; line-height: 1; transform: translate(1px, -2px) rotate(8deg); opacity: 0; }
+  .check input:checked::after { opacity: 1; }
+  .check input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* the ? button and the information panel */
+  #helpBtn { margin-left: auto; align-self: center; width: 34px; height: 34px; padding: 0; font-size: 22px; font-weight: 600; border-radius: 50% 46% 52% 48% / 48% 52% 46% 50%; }
+  #guide { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(243,239,229,.72); }
+  #guide[hidden] { display: none; }
+  .sheet {
+    width: min(760px, calc(100vw - 32px)); height: min(640px, calc(100vh - 48px)); display: flex; flex-direction: column;
+    background: var(--paper); border: 2px solid var(--ink); border-radius: 18px 6px 22px 8px / 8px 20px 6px 18px;
+    box-shadow: 3px 4px 0 rgba(46,45,51,.12); padding: 14px 20px 16px; box-sizing: border-box;
+  }
+  .sheet-head { display: flex; align-items: baseline; gap: 12px; }
+  .sheet-head h2 { margin: 0; font-size: 32px; font-weight: 600; flex: 1; }
+  .sheet-head button { font-size: 20px; padding: 0 10px; }
+  .tabs { display: flex; gap: 8px; margin: 10px 0 12px; }
+  .tabs button { flex: 1; font-size: 21px; padding: 2px 0 3px; }
+  .panel { flex: 1; min-height: 0; overflow-y: auto; font-size: 20px; line-height: 1.3; padding-right: 6px; }
+  .panel[hidden] { display: none; }
+  .panel h3 { font-size: 24px; font-weight: 600; margin: 16px 0 6px; }
+  .panel h3:first-child { margin-top: 0; }
+  .panel p { margin: 0 0 10px; }
+  .panel ul { margin: 0 0 12px; padding-left: 22px; }
+  .panel li { margin: 0 0 6px; }
+  .panel a { color: var(--ink); text-decoration-color: rgba(46,45,51,.45); text-underline-offset: 2px; }
+  .panel a:hover { text-decoration-color: var(--ink); }
+  .panel .empty { color: var(--soft); }
 </style>
 </head>
 <body>
 <header>
   <h1>How trees grow</h1>
   <span class="sub">side by side, from seed · 1 second = 1 year</span>
+  <button id="helpBtn" aria-label="Information and guide" title="Information and guide">?</button>
   <div id="picker"></div>
 </header>
 <main><canvas id="c"></canvas></main>
@@ -60,8 +97,44 @@
   <div id="speeds"></div>
   <span id="year">year 0</span>
   <input type="range" id="scrub" min="0" max="100" step="1" value="0" aria-label="Year">
+  <label class="check"><input type="checkbox" id="letDie" checked> Let trees die</label>
   <span class="note">typical values for open-grown trees, from forestry sources</span>
 </footer>
+<div id="guide" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="sheet-head">
+      <h2 id="guideTitle">Information &amp; guide</h2>
+      <button id="guideClose" aria-label="Close">✕ close</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="instructions">Instructions</button>
+      <button role="tab" data-tab="about">About</button>
+      <button role="tab" data-tab="references">References</button>
+    </div>
+    <div class="panel" role="tabpanel" data-panel="instructions"><p class="empty">Coming soon.</p></div>
+    <div class="panel" role="tabpanel" data-panel="about" hidden><p class="empty">Coming soon.</p></div>
+    <div class="panel" role="tabpanel" data-panel="references" hidden>
+<!-- refs:start (generated from REFERENCES.md by tools/build_refs.py; edit REFERENCES.md, then rerun it) -->
+<p>Sources used to set and verify the tree data (heights, growth with age, trunk diameter, crown width and lifespan). Each was read directly. "Used for" says which trees and values it supports; the reasoning behind each number is in <a href="https://github.com/internetofelephants/grow/blob/main/DATA.md" target="_blank" rel="noopener">DATA.md</a>.</p>
+<h3>Forestry references</h3>
+<p><strong>USDA Forest Service. <em>Silvics of North America</em>.</strong> Burns, R. M. &amp; Honkala, B. H. (technical coordinators), 1990. Agriculture Handbook 654. Washington, DC: U.S. Department of Agriculture, Forest Service. Chapters:</p>
+<ul><li>Olson, D. F., Jr., Roy, D. F. &amp; Walters, G. A. <em>Sequoia sempervirens</em> (Redwood). Vol. 1. <a href="https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_1/sequoia/sempervirens.htm" target="_blank" rel="noopener">Link</a> · Used for: coast redwood height by age, mature height, trunk diameter, maximum age.</li><li>Weatherspoon, C. P. <em>Sequoiadendron giganteum</em> (Giant Sequoia). Vol. 1. <a href="https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_1/sequoiadendron/giganteum.htm" target="_blank" rel="noopener">Link</a> · Used for: giant sequoia height and diameter by age, mature height, lifespan.</li><li>Hermann, R. K. &amp; Lavender, D. P. <em>Pseudotsuga menziesii</em> (Douglas-Fir). Vol. 1. <a href="https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_1/pseudotsuga/menziesii.htm" target="_blank" rel="noopener">Link</a> · Used for: Douglas fir height growth, old-growth height and diameter, lifespan.</li><li>Wendel, G. W. &amp; Smith, H. C. <em>Pinus strobus</em> (Eastern White Pine). Vol. 1. <a href="https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_1/pinus/strobus.htm" target="_blank" rel="noopener">Link</a> · Used for: white pine height growth, site index, mature size, lifespan.</li><li>Godman, R. M., Yawney, H. W. &amp; Tubbs, C. H. <em>Acer saccharum</em> (Sugar Maple). Vol. 2. <a href="https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_2/acer/saccharum.htm" target="_blank" rel="noopener">Link</a> · Used for: sugar maple height growth, mature size, lifespan.</li><li>Safford, L. O., Bjorkbom, J. C. &amp; Zasada, J. C. <em>Betula papyrifera</em> (Paper Birch). Vol. 2. <a href="https://web.archive.org/web/2020/https://www.srs.fs.usda.gov/pubs/misc/ag_654/volume_2/betula/papyrifera.htm" target="_blank" rel="noopener">Link</a> · Used for: paper birch site index, mature size, lifespan.</li></ul>
+<p><strong>European yield tables</strong>, as published in the R package <em>ForestElementsR</em>: Biber, P., Toraño Caicoya, A., Hilmers, T., et al. <em>ForestElementsR: Data Structures and Functions for Working with Forest Data</em>, version 3.0.0 (2026). Technical University of Munich. Yield tables from the Bavarian State Forest Administration's collection. <a href="https://cran.r-project.org/package=ForestElementsR" target="_blank" rel="noopener">CRAN</a> · Used for height by age (one site class per tree, see DATA.md):</p>
+<ul><li>Wiedemann (1936/42), Norway spruce, moderate thinning: Norway spruce</li><li>Wiedemann (1931), European beech, moderate thinning: European beech</li><li>Wiedemann (1943), Scots pine, moderate thinning: Scots pine</li><li>Hausser (1956), silver fir, moderate thinning: silver fir</li><li>Schober (1946), European larch, moderate thinning: European larch</li><li>Schwappach (1903/29), birch: silver birch</li><li>Mitscherlich (1945), black alder, heavy thinning: black alder</li><li>Wimmenauer (1919/29), ash, weak thinning: European ash</li><li>Jüttner (1955), oak, moderate thinning: English oak</li></ul>
+<p><strong>San-Miguel-Ayanz, J., de Rigo, D., Caudullo, G., Houston Durrant, T. &amp; Mauri, A. (eds.), 2016. <em>European Atlas of Forest Tree Species</em>.</strong> Luxembourg: Publications Office of the European Union. Chapters used:</p>
+<ul><li><em>Picea abies in Europe: distribution, habitat, usage and threats</em> (Caudullo, G., Tinner, W. &amp; de Rigo, D.) <a href="https://forest.jrc.ec.europa.eu/media/atlas/Picea_abies.pdf" target="_blank" rel="noopener">PDF</a> · Norway spruce height, trunk, lifespan</li><li><em>Fagus sylvatica in Europe: distribution, habitat, usage and threats</em> <a href="https://forest.jrc.ec.europa.eu/media/atlas/Fagus_sylvatica.pdf" target="_blank" rel="noopener">PDF</a> · European beech height, lifespan</li><li><em>Pinus sylvestris in Europe: distribution, habitat, usage and threats</em> (Houston Durrant, T., de Rigo, D. &amp; Caudullo, G.) <a href="https://forest.jrc.ec.europa.eu/media/atlas/Pinus_sylvestris.pdf" target="_blank" rel="noopener">PDF</a> · Scots pine average height</li><li><em>Abies alba in Europe: distribution, habitat, usage and threats</em> <a href="https://forest.jrc.ec.europa.eu/media/atlas/Abies_alba.pdf" target="_blank" rel="noopener">PDF</a> · silver fir lifespan in good habitats, height</li><li><em>Larix decidua and other larches in Europe: distribution, habitat, usage and threats</em> <a href="https://forest.jrc.ec.europa.eu/media/atlas/Larix_decidua.pdf" target="_blank" rel="noopener">PDF</a> · European larch height, lifespan</li><li><em>Alnus glutinosa in Europe: distribution, habitat, usage and threats</em> <a href="https://forest.jrc.ec.europa.eu/media/atlas/Alnus_glutinosa.pdf" target="_blank" rel="noopener">PDF</a> · black alder height, lifespan</li><li><em>Fraxinus excelsior in Europe: distribution, habitat, usage and threats</em> <a href="https://forest.jrc.ec.europa.eu/media/atlas/Fraxinus_excelsior.pdf" target="_blank" rel="noopener">PDF</a> · European ash maximum height</li><li>European Commission, Joint Research Centre. <em>Silver birch</em> (atlas tree page). <a href="https://forest.jrc.ec.europa.eu/en/european-atlas/qr-trees/silver-birch" target="_blank" rel="noopener">Link</a> · silver birch height, lifespan</li></ul>
+<h3>Research papers</h3>
+<ul><li>Steward, G. A., Kimberley, M. O., Mason, E. G. &amp; Dungey, H. S., 2014. Growth and productivity of New Zealand kauri (<em>Agathis australis</em> (D.Don) Lindl.) in planted forests. <em>New Zealand Journal of Forestry Science</em> 44: 27. <a href="https://nzjforestryscience.springeropen.com/articles/10.1186/s40490-014-0027-2" target="_blank" rel="noopener">Link</a> · Used for: kauri height by age.</li><li>Bledý, M., Vacek, S., Brabec, P., Vacek, Z., Cukor, J., Černý, J., Ševčík, R. &amp; Brynychová, K., 2024. Silver fir (<em>Abies alba</em> Mill.): review of ecological insights, forest management strategies, and climate change's impact on European forests. <em>Forests</em> 15(6): 998. <a href="https://www.mdpi.com/1999-4907/15/6/998" target="_blank" rel="noopener">Link</a> · Used for: silver fir lifespan.</li><li>Souza, T., Dobner, M., Batista, D. S., Araujo, D. J., Nascimento, G. S. &amp; da Silva, L. J. R., 2024. Site quality for <em>Araucaria angustifolia</em> plantations with subtropical Cambisol is driven by soil organism assemblage and the litter and soil compartments. <em>Forests</em> 15(3): 510. <a href="https://doi.org/10.3390/f15030510" target="_blank" rel="noopener">Link</a> · Used for: Paraná pine height at 30 years by site quality.</li></ul>
+<h3>Extension and horticultural publications</h3>
+<ul><li>Gilman, E. F., Hilbert, D., Watson, D. G., Klein, R., Koeser, A. &amp; McLean, D. C., 2018. <em>Salix babylonica: Weeping Willow</em>. ENH-734/ST576. University of Florida IFAS Extension. <a href="https://ask.ifas.ufl.edu/publication/st576" target="_blank" rel="noopener">Link</a> · Used for: weeping willow height, spread, lifespan.</li><li>Knox, G. W., 2014. <em>Paraná Pine, Araucaria angustifolia: An Ancient-Looking Conifer for Modern Landscapes</em>. ENH1248. University of Florida IFAS Extension. <a href="https://journals.flvc.org/edis/article/download/132001/135588/238089" target="_blank" rel="noopener">PDF</a> · Used for: Paraná pine mature size and age.</li><li>University of Maryland Extension, 2022. <em>All About Apple Rootstocks</em>. FS-2022-0638. <a href="https://extension.umd.edu/resource/all-about-apple-rootstocks" target="_blank" rel="noopener">Link</a> · Used for: standard apple tree height.</li><li>People's Trust for Endangered Species. <em>Rootstock</em> (Traditional Orchard Project practical guides). <a href="https://ptes.org/campaigns/traditional-orchard-project/orchard-practical-guides/planting-fruit-trees/rootstock/" target="_blank" rel="noopener">Link</a> · Used for: standard apple tree height and relative longevity.</li><li>FAO. Coconut: botany and growth (chapter of FAO document W7731E). <a href="https://www.fao.org/4/W7731E/w7731e07.htm" target="_blank" rel="noopener">Link</a> · Used for: coconut palm trunk diameter, height, age when the stem forms.</li><li>Tetra Pak. <em>Coconut Handbook</em>, chapter "Plantation". <a href="https://coconuthandbook.tetrapak.com/chapter/plantation" target="_blank" rel="noopener">Link</a> · Used for: coconut palm stem growth per year, lifespan.</li></ul>
+<h3>Conservation and forestry organisations</h3>
+<ul><li>Woodland Trust. <em>English oak (Quercus robur)</em>. <a href="https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/british-trees/a-z-of-british-trees/english-oak/" target="_blank" rel="noopener">Link</a> · Used for: English oak height and crown.</li><li>Woodland Trust, Ancient Tree Inventory. Species guides: <a href="https://ati.woodlandtrust.org.uk/how-to-record/species-guides/oak/" target="_blank" rel="noopener">oak</a> · <a href="https://ati.woodlandtrust.org.uk/how-to-record/species-guides/scots-pine/" target="_blank" rel="noopener">Scots pine</a> · <a href="https://ati.woodlandtrust.org.uk/how-to-record/species-guides/ash/" target="_blank" rel="noopener">ash</a> · Used for: typical lifespans of English oak, Scots pine and European ash.</li><li>Woodland Trust. <em>Ash (Fraxinus excelsior)</em>. <a href="https://www.woodlandtrust.org.uk/trees-woods-and-wildlife/british-trees/a-z-of-british-trees/ash/" target="_blank" rel="noopener">Link</a> · Used for: European ash height.</li><li>Forestry and Land Scotland. <em>Ash</em>. <a href="https://forestryandland.gov.scot/learn/trees/ash" target="_blank" rel="noopener">Link</a> · Used for: European ash height and lifespan.</li><li>PBS <em>Nature</em>. <em>Survivors of the Firestorm: Mountain Ash fact sheet</em>. <a href="https://www.pbs.org/wnet/nature/survivors-of-the-firestorm-mountain-ash-fact-sheet/6513" target="_blank" rel="noopener">Link</a> · Used for: mountain ash height, growth rate, average lifespan.</li><li>Visit Redwoods (Humboldt County). <em>Redwood facts</em>. <a href="https://www.visitredwoods.com/listing/redwood-facts/186/" target="_blank" rel="noopener">Link</a> · Used for: coast redwood average lifespan.</li><li>New Zealand Tree Register. Tree 1561 (<em>Sequoia sempervirens</em>). <a href="https://www.treeregister.nz/tree/view/1561" target="_blank" rel="noopener">Link</a> · Used for: coast redwood crown spread.</li></ul>
+<h3>Botanical databases and reference works</h3>
+<ul><li>Earle, C. J. (ed.). <em>The Gymnosperm Database</em>: <a href="https://conifers.org/pi/Pinus_longaeva.php" target="_blank" rel="noopener"><em>Pinus longaeva</em></a> · <a href="https://www.conifers.org/ar/Araucaria_angustifolia.php" target="_blank" rel="noopener"><em>Araucaria angustifolia</em></a> · Used for: bristlecone pine height, trunk and age; Paraná pine height and trunk.</li><li>Trees and Shrubs Online. <em>Abies alba</em>. <a href="https://www.treesandshrubsonline.org/articles/abies/abies-alba" target="_blank" rel="noopener">Link</a> · Used for: silver fir height and trunk diameter.</li><li>Ebben Nurseries. <em>Sequoiadendron giganteum</em>. <a href="https://www.ebben.nl/en/treeebb/segigant-sequoiadendron-giganteum/" target="_blank" rel="noopener">Link</a> · Used for: giant sequoia crown width in cultivation.</li><li>Gardening Know How. <em>Lombardy poplar trees</em>. <a href="https://www.gardeningknowhow.com/ornamental/trees/poplar/lombardy-poplar-trees.htm" target="_blank" rel="noopener">Link</a> · Used for: Lombardy poplar height, spread, canker.</li><li>Exeter Trees. <em>Lombardy poplar</em>. <a href="https://exetertrees.uk/poplar-lombardy.html" target="_blank" rel="noopener">Link</a> · Used for: Lombardy poplar growth rate and lifespan.</li><li>Wikipedia (and the sources it cites): <a href="https://en.wikipedia.org/wiki/Eucalyptus_regnans" target="_blank" rel="noopener"><em>Eucalyptus regnans</em></a> (mountain ash height by age, trunk, age) · <a href="https://en.wikipedia.org/wiki/Quercus_robur" target="_blank" rel="noopener"><em>Quercus robur</em></a> (English oak trunk girth) · <a href="https://en.wikipedia.org/wiki/Cocos_nucifera" target="_blank" rel="noopener"><em>Cocos nucifera</em></a> (coconut palm fronds, lifespan) · <a href="https://en.wikipedia.org/wiki/Pinus_longaeva" target="_blank" rel="noopener"><em>Pinus longaeva</em></a> (bristlecone pine height and average ages) · <a href="https://en.wikipedia.org/wiki/Agathis_australis" target="_blank" rel="noopener"><em>Agathis australis</em></a> (kauri height and lifespan) · <a href="https://en.wikipedia.org/wiki/Araucaria_angustifolia" target="_blank" rel="noopener"><em>Araucaria angustifolia</em></a> (Paraná pine height, early growth)</li></ul>
+<!-- refs:end -->
+    </div>
+  </div>
+</div>
 <!-- the dev server lets the browser cache stale code, so bust it on every load -->
 <script>document.write('<script src="main.js?v=' + Date.now() + '"><\/script>');</script>
 </body>

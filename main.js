@@ -89,16 +89,18 @@ function curve(age, t50, c) {
   return Math.pow(1 - Math.exp(-k * age), c);
 }
 
+// With "Let trees die" off, a tree keeps living (and growing) past its lifespan; `overdue` marks that.
 function stateAt(sp, year) {
-  const alive = year < sp.life;
-  const a = Math.min(year, sp.life);
+  const overdue = year >= sp.life;
+  const alive = !overdue || !letDie;
+  const a = letDie ? Math.min(year, sp.life) : year;
   const h = Math.max(0.12, sp.H * curve(a, sp.t50, sp.c));
   const cw = Math.max(0.1, sp.CW * curve(a, sp.t50 * 1.1, 1.2));
   const d = sp.form === 'palm'
     ? sp.D * clamp(0.3 + a / 8, 0, 1)                      // palms don't thicken once the trunk is up
     : Math.max(0.01, sp.D * curve(a, sp.dt50 || Math.min(sp.life * 0.3, sp.t50 * 4), sp.dc || 1.1));
-  const decl = clamp((a - sp.life * 0.85) / (sp.life * 0.15), 0, 1);
-  return { age: year, h, cw, d, g: h / sp.H, decl, fol: alive ? 1 - 0.7 * decl : 0, alive };
+  const decl = letDie ? clamp((a - sp.life * 0.85) / (sp.life * 0.15), 0, 1) : 0;
+  return { age: year, h, cw, d, g: h / sp.H, decl, fol: alive ? 1 - 0.7 * decl : 0, alive, overdue };
 }
 
 // ---------- skeletons (built once per species, in metres at maturity)
@@ -564,27 +566,74 @@ function drawPerson(x, gy, pxm) {
   pline(x, sh, x + h * 0.1, gy - h * 0.52, 56, lw, a, 1);
 }
 
+// Label lines for one tree: name, Latin name, age and height, then its status.
+// Each line shrinks to fit the column and, if it still doesn't fit, wraps.
+function labelLines(sp, st, colW) {
+  const fs = colW < 150 ? 17 : 21;
+  const yrs = n => Math.floor(n).toLocaleString();
+  const lines = [
+    { text: sp.name, size: fs, weight: 600, alpha: 0.9 },
+    { text: sp.sci, size: fs - 4, alpha: 0.55 },
+  ];
+  if (st.alive) {
+    lines.push({ text: `${yrs(st.age)} yrs · ${fmtM(st.h)}`, size: fs - 1, alpha: 0.85 });
+    const status = [];
+    if (st.g > 0.97) status.push('full size');
+    if (st.overdue) status.push(`† would have died at ${yrs(sp.life)}`);
+    if (status.length) lines.push({ text: status.join(' · '), size: fs - 3, alpha: 0.6 });
+  } else {
+    lines.push({ text: `† died at ${yrs(sp.life)}`, size: fs - 1, alpha: 0.85 });
+    lines.push({ text: `reached ${fmtM(st.h)}`, size: fs - 3, alpha: 0.6 });
+  }
+  const maxW = colW - 8, out = [];
+  for (const ln of lines) {
+    const font = sz => `${ln.weight || 400} ${sz}px Caveat, cursive`;
+    let size = ln.size;
+    ctx.font = font(size);
+    while (size > 12 && ctx.measureText(ln.text).width > maxW) ctx.font = font(--size);
+    // still too wide: wrap at spaces
+    let row = '';
+    for (const word of ln.text.split(' ')) {
+      const test = row ? row + ' ' + word : word;
+      if (row && ctx.measureText(test).width > maxW) { out.push({ text: row, font: font(size), size, alpha: ln.alpha }); row = word; }
+      else row = test;
+    }
+    out.push({ text: row, font: font(size), size, alpha: ln.alpha });
+  }
+  return out;
+}
+
+const labelHeight = lines => lines.reduce((sum, ln) => sum + ln.size * 1.05 + 2, 6);
+
+// Room under the ground for the tallest label any tree here could need (dead, or overdue at full size),
+// so the ground line doesn't move during a run.
+function labelRoom(colW) {
+  let room = 0;
+  for (const tr of trees) {
+    const sp = tr.sp;
+    const old = { age: maxYear(), h: sp.H, g: 1, alive: true, overdue: true };
+    const dead = { age: maxYear(), h: sp.H, g: 1, alive: false, overdue: true };
+    room = Math.max(room, labelHeight(labelLines(sp, old, colW)), labelHeight(labelLines(sp, dead, colW)));
+  }
+  return Math.ceil(room) + 8;
+}
+
 function drawLabel(tr, st, cx, gy, colW) {
-  const sp = tr.sp, fs = colW < 150 ? 17 : 21;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  ctx.globalAlpha = 0.9;
-  ctx.font = `600 ${fs}px Caveat, cursive`;
-  ctx.fillText(sp.name, cx, gy + 26);
-  ctx.globalAlpha = 0.55;
-  ctx.font = `${fs - 4}px Caveat, cursive`;
-  ctx.fillText(sp.sci, cx, gy + 44);
-  ctx.globalAlpha = 0.85;
-  ctx.font = `${fs - 1}px Caveat, cursive`;
-  const s = st.alive
-    ? `${Math.floor(st.age)} yrs · ${fmtM(st.h)}${st.g > 0.97 ? ' · full size' : ''}`
-    : `† died at ${sp.life.toLocaleString()} · reached ${fmtM(st.h)}`;
-  ctx.fillText(s, cx, gy + 66);
+  let y = gy + 6;
+  for (const ln of labelLines(tr.sp, st, colW)) {
+    y += ln.size * 1.05 + 2;
+    ctx.font = ln.font;
+    ctx.globalAlpha = ln.alpha;
+    ctx.fillText(ln.text, cx, y);
+  }
 }
 
 // ---------- state
 let selected = ['redwood', 'ash', 'oak', 'birch', 'poplar'];
 let trees = [];
+let letDie = true;
 let year = 0, playing = false, speed = 1, lastT = 0, scrubbing = false;
 const view = { h: 0 };
 
@@ -607,9 +656,10 @@ function render(dt) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.globalAlpha = 1;
   ctx.drawImage(paper, 0, 0, W, H);
-  const L = 58, R = 16, T = 26, B = 80;
-  const gy = H - B, plotH = gy - T;
+  const L = 58, R = 16, T = 26;
   const x0 = L + 34, colW = (W - R - x0) / trees.length;
+  const B = Math.max(70, labelRoom(colW));
+  const gy = H - B, plotH = gy - T;
   const states = trees.map(tr => stateAt(tr.sp, year));
   const target = targetView(colW, plotH);
   view.h = view.h ? view.h + (target - view.h) * (1 - Math.exp(-dt * 4)) : target;
@@ -712,8 +762,44 @@ window.addEventListener('pointerup', () => { scrubbing = false; });
 scrub.addEventListener('input', () => { year = +scrub.value; });
 
 window.addEventListener('keydown', e => {
+  if (!guide.hidden) {
+    if (e.key === 'Escape' || e.key === '?') { e.preventDefault(); closeGuide(); }
+    return;
+  }
+  if (e.key === '?') { e.preventDefault(); openGuide(); return; }
   if (e.code === 'Space' && e.target.tagName !== 'INPUT') { e.preventDefault(); playBtn.click(); }
 });
+
+$('#letDie').addEventListener('change', e => { letDie = e.target.checked; });
+
+// ---------- information & guide panel
+const guide = $('#guide'), helpBtn = $('#helpBtn');
+
+function guideTab(name) {
+  guide.querySelectorAll('.tabs button').forEach(b => {
+    const on = b.dataset.tab === name;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-selected', on);
+  });
+  guide.querySelectorAll('.panel').forEach(p => { p.hidden = p.dataset.panel !== name; });
+}
+
+function openGuide(tab) {
+  if (tab) guideTab(tab);
+  guide.hidden = false;
+  $('#guideClose').focus();
+}
+
+function closeGuide() {
+  guide.hidden = true;
+  helpBtn.focus();
+}
+
+helpBtn.onclick = () => openGuide();
+$('#guideClose').onclick = closeGuide;
+guide.addEventListener('click', e => { if (e.target === guide) closeGuide(); });   // click outside the sheet
+guide.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => guideTab(b.dataset.tab); });
+guideTab('instructions');
 
 function frame(t) {
   const dt = lastT ? Math.min(0.1, (t - lastT) / 1000) : 0;
