@@ -566,7 +566,7 @@ function drawPerson(x, gy, pxm) {
   pline(x, sh, x + h * 0.1, gy - h * 0.52, 56, lw, a, 1);
 }
 
-// Label lines for one tree: name, Latin name, age and height, then its status.
+// Label lines for one tree: name, Latin name, height, then its status.
 // Each line shrinks to fit the column and, if it still doesn't fit, wraps.
 function labelLines(sp, st, colW) {
   const fs = colW < 150 ? 17 : 21;
@@ -576,7 +576,7 @@ function labelLines(sp, st, colW) {
     { text: sp.sci, size: fs - 4, alpha: 0.55 },
   ];
   if (st.alive) {
-    lines.push({ text: `${yrs(st.age)} yrs · ${fmtM(st.h)}`, size: fs - 1, alpha: 0.85 });
+    lines.push({ text: fmtM(st.h), size: fs - 1, alpha: 0.85 });
     const status = [];
     if (st.g > 0.97) status.push('full size');
     if (st.overdue) status.push(`† would have died at ${yrs(sp.life)}`);
@@ -695,7 +695,7 @@ function say(text) {
 
 function buildPicker() {
   const box = $('#picker');
-  box.innerHTML = '<span class="lbl">pick 3–5 trees:</span>';
+  box.innerHTML = '<span class="lbl">pick 1–5 trees:</span>';
   for (const sp of SPECIES) {
     if (sp.group === 'more' && !box.querySelector('.row-break')) {
       const br = document.createElement('span');
@@ -721,7 +721,7 @@ function refreshPicker() {
 
 function toggle(id) {
   if (selected.includes(id)) {
-    if (selected.length <= 3) return say('keep at least 3');
+    if (selected.length <= 1) return say('keep at least 1');
     selected = selected.filter(s => s !== id);
   } else {
     if (selected.length >= 5) return say('5 at most: take one away first');
