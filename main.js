@@ -40,7 +40,7 @@ const SPECIES = [
   { id: 'pine', name: 'White pine', sci: 'Pinus strobus', H: 46, CW: 12, D: 1, life: 200, t50: 47, c: 1.2,
     form: 'conifer', bark: 'furrow', P: { whorls: 16, cone: 0.5, droop: -0.1, lift: 0.35, needle: 1.3, tick: -1, ragged: 0.6 } },
   { id: 'ash', name: 'Mountain ash', sci: 'Eucalyptus regnans', H: 85, CW: 18, D: 2.5, life: 400, t50: 28, c: 1.05,
-    form: 'broad', bark: 'smooth', P: { trunk: 0.58, nodes: 7, env: 'round', angLow: 0.95, angHigh: 0.35, depth: 3, spread: 0.6, ratio: 0.68, up: 0.2, jit: 0.5, leafR: 0.13, asp: 0.6, leaf: 'cloud', sparse: 0.4 } },
+    form: 'broad', bark: 'smooth', P: { trunk: 0.58, nodes: 7, env: 'round', angLow: 1.2, angHigh: 0.7, depth: 3, spread: 0.75, ratio: 0.68, up: 0.1, jit: 0.5, leafR: 0.13, asp: 0.6, leaf: 'cloud', sparse: 0.25} },
   { id: 'oak', name: 'English oak', sci: 'Quercus robur', H: 31.5, CW: 22, D: 2, life: 600, t50: 56, c: 1.25,
     form: 'broad', bark: 'furrow', P: { trunk: 0.3, nodes: 6, env: 'dome', angLow: 1.25, angHigh: 0.5, depth: 3, spread: 0.8, ratio: 0.7, up: 0.1, jit: 0.6, leafR: 0.12, asp: 0.85, leaf: 'cloud' } },
   { id: 'maple', name: 'Sugar maple', sci: 'Acer saccharum', H: 32, CW: 14, D: 0.85, life: 350, t50: 50, c: 2.7,
@@ -48,20 +48,20 @@ const SPECIES = [
   { id: 'birch', name: 'Paper birch', sci: 'Betula papyrifera', H: 21, CW: 9, D: 0.35, life: 140, t50: 21, c: 1.4,
     form: 'broad', bark: 'birch', P: { trunk: 0.22, nodes: 9, env: 'ovoid', angLow: 1.0, angHigh: 0.45, depth: 2, spread: 0.5, ratio: 0.7, up: 0.25, jit: 0.4, leafR: 0.14, asp: 1.0, leaf: 'cloud' } },
   { id: 'poplar', name: 'Lombardy poplar', sci: "Populus nigra 'Italica'", H: 18, CW: 4, D: 0.8, life: 40, t50: 8, c: 1.65,
-    form: 'broad', bark: 'furrow', P: { trunk: 0.06, nodes: 12, env: 'column', angLow: 0.3, angHigh: 0.12, depth: 2, spread: 0.2, ratio: 0.75, up: 0.5, jit: 0.15, leafR: 0.3, asp: 1.6, leaf: 'cloud' } },
+    form: 'broad', bark: 'furrow', P: { trunk: 0.06, nodes: 12, env: 'column', angLow: 0.3, angHigh: 0.12, depth: 2, spread: 0.2, ratio: 0.75, up: 0.5, jit: 0.15, leafR: 0.22, asp: 1.5, leaf: 'cloud', sparse: 0.8, ink: 0.55 } },
   { id: 'willow', name: 'Weeping willow', sci: 'Salix babylonica', H: 12, CW: 13, D: 0.9, life: 30, t50: 5, c: 1.4,
     form: 'broad', bark: 'furrow', P: { trunk: 0.35, nodes: 6, env: 'round', angLow: 1.3, angHigh: 0.6, depth: 3, spread: 0.7, ratio: 0.7, up: 0.1, jit: 0.5, leafR: 0.1, asp: 0.8, leaf: 'weep', weep: 0.55 } },
   { id: 'palm', name: 'Coconut palm', sci: 'Cocos nucifera', H: 28, CW: 10, D: 0.35, life: 80, t50: 33.5, c: 1.2,
     form: 'palm', bark: 'rings', P: { lean: 0.12 } },
   { id: 'apple', name: 'Apple', sci: 'Malus domestica', H: 8, CW: 9, D: 0.4, life: 100, t50: 7.5, c: 1.4,
-    form: 'broad', bark: 'hatch', P: { trunk: 0.3, nodes: 5, env: 'round', angLow: 1.2, angHigh: 0.75, depth: 3, spread: 0.8, ratio: 0.7, up: 0.1, jit: 0.6, leafR: 0.14, asp: 0.85, leaf: 'cloud', fruit: true } },
+    form: 'broad', bark: 'hatch', P: { trunk: 0.3, nodes: 5, env: 'round', angLow: 1.2, angHigh: 0.75, depth: 3, spread: 0.8, ratio: 0.7, up: 0.1, jit: 0.9, leafR: 0.14, asp: 0.85, leaf: 'cloud', fruit: true, sparse: 0.35, ink: 0.7 } },
   { id: 'bristlecone', name: 'Bristlecone pine', sci: 'Pinus longaeva', H: 10, CW: 8, D: 1.5, life: 3000, t50: 250, c: 1.4,
     form: 'broad', bark: 'furrow', P: { trunk: 0.22, nodes: 5, env: 'round', angLow: 1.3, angHigh: 0.7, depth: 3, spread: 0.9, ratio: 0.7, up: 0.05, jit: 1.1, leafR: 0.12, asp: 0.8, leaf: 'tuft', wob: 0.08 } },
   // More trees from other countries (second row of the picker; group: 'more'). Sources in DATA.md.
   { id: 'spruce', group: 'more', name: 'Norway spruce', sci: 'Picea abies', H: 40, CW: 9, D: 1, life: 250, t50: 48, c: 1.8,
     form: 'conifer', bark: 'furrow', P: { whorls: 30, cone: 1.0, droop: 0.3, lift: 0.3, needle: 1.2, tick: 1 } },
   { id: 'beech', group: 'more', name: 'European beech', sci: 'Fagus sylvatica', H: 41, CW: 18, D: 1.2, life: 225, t50: 61, c: 1.6,
-    form: 'broad', bark: 'smooth', P: { trunk: 0.3, nodes: 7, env: 'round', angLow: 1.05, angHigh: 0.4, depth: 3, spread: 0.6, ratio: 0.7, up: 0.2, jit: 0.4, leafR: 0.12, asp: 0.85, leaf: 'cloud' } },
+    form: 'broad', bark: 'smooth', P: { trunk: 0.22, nodes: 7, env: 'dome', angLow: 1.35, angHigh: 0.75, depth: 3, spread: 0.75, ratio: 0.7, up: 0.06, jit: 0.4, leafR: 0.12, asp: 0.85, leaf: 'cloud' } },
   { id: 'scotspine', group: 'more', name: 'Scots pine', sci: 'Pinus sylvestris', H: 28, CW: 10, D: 0.8, life: 250, t50: 49, c: 1.3,
     form: 'broad', bark: 'furrow', P: { trunk: 0.6, nodes: 5, env: 'round', angLow: 1.2, angHigh: 0.8, depth: 3, spread: 0.8, ratio: 0.7, up: 0.05, jit: 0.9, leafR: 0.13, asp: 0.6, leaf: 'tuft', wob: 0.04 } },
   { id: 'silverfir', group: 'more', name: 'Silver fir', sci: 'Abies alba', H: 43, CW: 10, D: 1.5, life: 450, t50: 67, c: 1.95,
@@ -69,15 +69,15 @@ const SPECIES = [
   { id: 'larch', group: 'more', name: 'European larch', sci: 'Larix decidua', H: 36, CW: 10, D: 1, life: 600, t50: 37.5, c: 1.3,
     form: 'conifer', bark: 'furrow', P: { whorls: 18, cone: 0.8, droop: 0.15, lift: 0.45, needle: 0.8, tick: -1, ragged: 0.4 } },
   { id: 'silverbirch', group: 'more', name: 'Silver birch', sci: 'Betula pendula', H: 26, CW: 8, D: 0.4, life: 95, t50: 35.5, c: 1.15,
-    form: 'broad', bark: 'birch', P: { trunk: 0.2, nodes: 9, env: 'ovoid', angLow: 0.9, angHigh: 0.4, depth: 2, spread: 0.5, ratio: 0.7, up: 0.25, jit: 0.4, leafR: 0.13, asp: 1.0, leaf: 'weep', weep: 0.12 } },
+    form: 'broad', bark: 'birch', P: { trunk: 0.2, nodes: 9, env: 'ovoid', angLow: 1.15, angHigh: 0.65, depth: 2, spread: 0.6, ratio: 0.7, up: 0.12, jit: 0.4, leafR: 0.13, asp: 1.0, leaf: 'weep', weep: 0.1} },
   { id: 'alder', group: 'more', name: 'Black alder', sci: 'Alnus glutinosa', H: 25, CW: 8, D: 0.5, life: 60, t50: 35.5, c: 0.8,
     form: 'broad', bark: 'furrow', P: { trunk: 0.15, nodes: 9, env: 'ovoid', angLow: 1.1, angHigh: 0.5, depth: 2, spread: 0.5, ratio: 0.7, up: 0.15, jit: 0.4, leafR: 0.13, asp: 0.9, leaf: 'cloud' } },
   { id: 'euash', group: 'more', name: 'European ash', sci: 'Fraxinus excelsior', H: 32, CW: 15, D: 1, life: 200, t50: 32.5, c: 1.7,
-    form: 'broad', bark: 'furrow', P: { trunk: 0.35, nodes: 7, env: 'round', angLow: 0.95, angHigh: 0.35, depth: 3, spread: 0.6, ratio: 0.68, up: 0.25, jit: 0.4, leafR: 0.12, asp: 0.8, leaf: 'cloud', sparse: 0.3 } },
+    form: 'broad', bark: 'furrow', P: { trunk: 0.35, nodes: 7, env: 'round', angLow: 1.25, angHigh: 0.7, depth: 3, spread: 0.7, ratio: 0.68, up: 0.1, jit: 0.4, leafR: 0.12, asp: 0.8, leaf: 'cloud', sparse: 0.3 } },
   { id: 'kauri', group: 'more', name: 'Kauri', sci: 'Agathis australis', H: 45, CW: 20, D: 2.5, life: 800, t50: 62.5, c: 1,
-    form: 'broad', bark: 'smooth', P: { trunk: 0.62, nodes: 6, env: 'round', angLow: 1.2, angHigh: 0.6, depth: 3, spread: 0.7, ratio: 0.7, up: 0.15, jit: 0.6, leafR: 0.12, asp: 0.6, leaf: 'cloud' } },
+    form: 'broad', bark: 'smooth', P: { trunk: 0.62, nodes: 6, env: 'dome', angLow: 1.4, angHigh: 0.95, depth: 3, spread: 0.8, ratio: 0.7, up: 0.04, jit: 0.6, leafR: 0.12, asp: 0.5, leaf: 'cloud' } },
   { id: 'parana', group: 'more', name: 'Paraná pine', sci: 'Araucaria angustifolia', H: 30, CW: 15, D: 1, life: 200, t50: 21.5, c: 2.5,
-    form: 'broad', bark: 'furrow', P: { trunk: 0.65, nodes: 6, env: 'cup', angLow: 1.15, angHigh: 0.85, depth: 2, spread: 0.5, ratio: 0.75, up: -0.05, jit: 0.3, leafR: 0.1, asp: 0.5, leaf: 'tuft' } },
+    form: 'broad', bark: 'furrow', P: { trunk: 0.65, nodes: 6, env: 'cup', angLow: 1.35, angHigh: 1.0, depth: 2, spread: 0.5, ratio: 0.75, up: 0.35, jit: 0.3, leafR: 0.16, asp: 0.35, leaf: 'tuft', tuftN: 26 } },
 ];
 SPECIES.forEach((sp, i) => { sp.seed = 977 * (i + 1) + 13; });
 
@@ -95,7 +95,9 @@ function stateAt(sp, year) {
   const alive = !overdue || !letDie;
   const a = letDie ? Math.min(year, sp.life) : year;
   const h = Math.max(0.12, sp.H * curve(a, sp.t50, sp.c));
-  const cw = Math.max(0.1, sp.CW * curve(a, sp.t50 * 1.1, 1.2));
+  const cw = sp.form === 'palm'
+    ? sp.CW * clamp(0.3 + a / 8, 0, 1)                     // a palm's fronds are full length before its trunk forms
+    : Math.max(0.1, sp.CW * curve(a, sp.t50 * 1.1, 1.2));
   const d = sp.form === 'palm'
     ? sp.D * clamp(0.3 + a / 8, 0, 1)                      // palms don't thicken once the trunk is up
     : Math.max(0.01, sp.D * curve(a, sp.dt50 || Math.min(sp.life * 0.3, sp.t50 * 4), sp.dc || 1.1));
@@ -160,6 +162,12 @@ function genBroad(sp) {
   const fx = (sp.CW / 2 - R) / mx, fy = (sp.H - Ry) / my;
   for (const s of segs) { s.x1 *= fx; s.x2 *= fx; s.y1 *= fy; s.y2 *= fy; }
   for (const t of tips) { t.x *= fx; t.y *= fy; }
+  // Most leaf clusters bunch near the trunk; spread them outward (|x|^p, p < 1, keeps the outer edge
+  // and the trunk in place) so the crown reads as wide as it really is.
+  const p = P.spreadOut ?? 0.8, edge = sp.CW / 2 - R;
+  const out = x => Math.sign(x) * edge * Math.pow(Math.min(1, Math.abs(x) / edge), p);
+  for (const s of segs) { s.x1 = out(s.x1); s.x2 = out(s.x2); }
+  for (const t of tips) t.x = out(t.x);
   return { segs, tips, R, Ry };
 }
 
@@ -328,8 +336,8 @@ function scribble(cx, cy, rx, ry, seed, alpha) {
 }
 
 // Short strokes radiating from a twig end (needle tufts).
-function tuft(cx, cy, rx, ry, seed, alpha, fol) {
-  const r = mulberry32(seed), n = Math.round(5 + 10 * fol);
+function tuft(cx, cy, rx, ry, seed, alpha, fol, many = 15) {
+  const r = mulberry32(seed), n = Math.round((5 + 10 * fol) * many / 15);
   ctx.globalAlpha = alpha;
   ctx.lineWidth = 0.7;
   ctx.beginPath();
@@ -379,7 +387,7 @@ function drawBroad(tr, st, cx, gy, pxm, alpha) {
     limb(x1, y1, x2, y2, s.w1 * wpx, lerp(s.w1, s.w2, vis) * wpx, tr.seed + i * 7, alpha, s.depth === 0 ? sp.bark : (s.w1 * wpx > 5 ? sp.bark : 'hatch'));
   });
   if (st.fol <= 0) return;
-  const fa = alpha * (0.35 + 0.25 * st.fol);
+  const fa = alpha * (0.35 + 0.25 * st.fol) * (P.ink || 1);
   sk.tips.forEach((tp, i) => {
     const vis = tp.birth === 0 ? 1 : clamp((st.g - tp.birth) / 0.1, 0, 1);
     if (vis <= 0) return;
@@ -388,7 +396,7 @@ function drawBroad(tr, st, cx, gy, pxm, alpha) {
     const x = cx + tp.x * sx, y = gy - tp.y * sy;
     const rx = Math.max(1.5, sk.R * sx * vis), ry = Math.max(1.5, sk.Ry * sy * vis);
     const seed = tr.seed + i * 13;
-    if (P.leaf === 'tuft') { tuft(x, y, rx, ry, seed, fa, st.fol); return; }
+    if (P.leaf === 'tuft') { tuft(x, y, rx, ry, seed, fa, st.fol, P.tuftN); return; }
     if (P.leaf === 'weep') {
       scribble(x, y, rx * 0.7, ry * 0.6, seed, fa * 0.7);
       const len = Math.min(P.weep * st.h * pxm, gy - y - 2);
@@ -409,9 +417,12 @@ function drawConifer(tr, st, cx, gy, pxm, alpha) {
   const sx = st.cw / sp.CW * pxm, sy = st.h / sp.H * pxm, wpx = st.d * pxm;
   limb(cx, gy, cx, gy - st.h * pxm, wpx, Math.max(0.6, wpx * 0.06), tr.seed, alpha, sp.bark);
   const lift = P.lift * smooth(st.age / (sp.life * 0.5));   // old conifers shed their lower branches
+  // Branch length follows the cone over the living crown (lift..top), not the whole trunk, so an old
+  // conifer keeps its full crown width on top of a clear trunk. (1-u)^cone over the crown = this factor.
+  const reach = Math.pow(1 / (1 - lift), P.cone);
   sk.wh.forEach((w, i) => {
     if (w.u < lift) return;
-    const by = gy - w.u * sp.H * sy, L = w.len * sx;
+    const by = gy - w.u * sp.H * sy, L = Math.min(w.len * reach, sp.CW / 2) * sx;
     if (L < 0.5) return;
     const ex = cx + w.side * L * Math.cos(w.ang), ey = by + L * Math.sin(w.ang);
     const a = alpha * (w.front ? 0.6 : 0.9);
@@ -451,13 +462,15 @@ function drawPalm(tr, st, cx, gy, pxm, alpha) {
   if (st.fol <= 0) return;
   const [tx, ty] = pt(1);
   const r = mulberry32(tr.seed + 99);
-  const n = Math.round(6 + 8 * st.fol);
+  const n = Math.round(5 + 5 * st.fol);
   const fa = alpha * (0.5 + 0.3 * st.fol);
   for (let k = 0; k < n; k++) {
-    const ang = lerp(-2.3, 2.3, (k + 0.5) / n) + (r() - 0.5) * 0.3;
-    const Lf = crown * 0.55 * (0.8 + 0.3 * r());
-    const c1x = tx + Math.sin(ang) * Lf * 0.5, c1y = ty - Math.cos(ang) * Lf * 0.5 - Lf * 0.25;
-    const ex = tx + Math.sin(ang) * Lf, ey = ty - Math.cos(ang) * Lf * 0.6 + Lf * 0.35;
+    // fronds arch up and out from the crown, the side ones drooping at the tips
+    const ang = lerp(-2.0, 2.0, (k + 0.5) / n) + (r() - 0.5) * 0.3;
+    const Lf = crown * 0.52 * (0.85 + 0.3 * r());
+    const side = Math.abs(Math.sin(ang));
+    const c1x = tx + Math.sin(ang) * Lf * 0.5, c1y = ty - Lf * (0.3 + 0.35 * Math.cos(ang));
+    const ex = tx + Math.sin(ang) * Lf * 0.95, ey = ty - Math.cos(ang) * Lf * 0.35 + Lf * 0.45 * side;
     ctx.globalAlpha = fa;
     ctx.lineWidth = 0.9;
     ctx.beginPath();
