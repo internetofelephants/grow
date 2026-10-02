@@ -283,7 +283,7 @@ function skeleton(sp) {
 
 // ---------- canvas + paper
 const cv = document.getElementById('c');
-const ctx = cv.getContext('2d');
+let ctx = cv.getContext('2d');                // swapped for an offscreen canvas by the poster mode
 let dpr = 1, paper = null;
 
 function makePaper(w, h) {
@@ -1049,7 +1049,98 @@ function frame(t) {
   requestAnimationFrame(frame);
 }
 
-buildPicker();
-buildTrees();
-resize();
-requestAnimationFrame(frame);
+// ---------- poster mode: index.html?poster=oak or ?poster=strip draws concept art (3:2, 3600×2400)
+// with the same pencil strokes as the app, and nothing else on the page but a Save button.
+const POSTER_AGES = [20, 60, 100, 300];
+
+function drawPoster(kind) {
+  const W = 1500, H = 1000, k = 2.4;                 // laid out at 1500×1000, drawn at 2.4× for 3600×2400
+  const out = document.createElement('canvas');
+  out.width = W * k; out.height = H * k;
+  const keep = { ctx, dpr };
+  ctx = out.getContext('2d');
+  dpr = k;
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  ctx.drawImage(makePaper(W, H), 0, 0, W, H);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = INK; ctx.fillStyle = INK;
+
+  const sp = SPECIES.find(s => s.id === 'oak'), tr = { sp, sk: skeleton(sp), seed: sp.seed };
+  const L = 70, R = 70, T = 60, gy = 780;
+  const ages = kind === 'strip' ? POSTER_AGES : [300];
+  const states = ages.map(a => stateAt(sp, a));
+  // the scale: the full-grown oak fills most of the height (smaller in the strip, so four fit)
+  const pxm = kind === 'strip' ? 470 / sp.H : 590 / sp.H;
+  // a quiet square grid, 5 m major and 1 m minor lines, centred on the sheet
+  const grid = (step, alpha, seed) => {
+    for (let v = step; gy - v * pxm > T; v += step) pline(L, gy - v * pxm, W - R, gy - v * pxm, seed + v * 10, 0.7, alpha, 1, 0.6);
+    for (let v = 0; W / 2 + v * pxm < W - R; v += step) {
+      for (const sx of v ? [1, -1] : [1]) {
+        const xx = W / 2 + sx * v * pxm;
+        pline(xx, gy, xx, T, seed + 5000 + sx * v * 10, 0.7, alpha, 1, 0.6);
+      }
+    }
+  };
+  grid(1, 0.055, 300);
+  grid(5, 0.2, 100);
+  drawGround(L, R, gy, W);
+
+  // trees spaced so the gaps between crowns are equal
+  const widths = states.map(st => Math.max(st.cw * pxm, 30));
+  const gap = (W - L - R - widths.reduce((a, b) => a + b, 0)) / (ages.length + 1);
+  let x = L + gap;
+  const xs = widths.map(w => { const cx = x + w / 2; x += w + gap; return cx; });
+  states.forEach((st, i) => drawTree(tr, st, xs[i], gy, pxm));
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  const text = (t, size, weight, alpha, cx, y) => {
+    ctx.font = `${weight} ${size}px Caveat, cursive`;
+    ctx.globalAlpha = alpha;
+    ctx.fillText(t, cx, y);
+  };
+  if (kind === 'strip') {
+    ages.forEach((a, i) => text(`${a} years`, 30, 600, 0.85, xs[i], gy + 46));
+    text(sp.name, 40, 600, 0.9, W / 2, gy + 120);
+    text(sp.sci, 30, 400, 0.55, W / 2, gy + 156);
+  } else {
+    text(sp.name, 40, 600, 0.9, xs[0], gy + 56);
+    text(sp.sci, 30, 400, 0.55, xs[0], gy + 92);
+  }
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  text('Grow', 130, 600, 0.95, L + 10, T - 20);
+  ctx.globalAlpha = 1;
+
+  ctx = keep.ctx;
+  dpr = keep.dpr;
+  return out;
+}
+
+async function posterMode(kind) {
+  document.body.classList.add('poster');
+  await document.fonts.load('600 40px Caveat');
+  await document.fonts.load('400 40px Caveat');
+  const art = drawPoster(kind);
+  art.className = 'poster-art';
+  document.body.appendChild(art);
+  const bar = document.createElement('div');
+  bar.className = 'poster-bar';
+  bar.innerHTML = `<a href="?poster=oak">oak</a><a href="?poster=strip">growth strip</a><button>Save PNG</button>`;
+  bar.querySelector('button').onclick = () => {
+    const a = document.createElement('a');
+    a.download = `grow-${kind}.png`;
+    a.href = art.toDataURL('image/png');
+    a.click();
+  };
+  document.body.appendChild(bar);
+}
+
+const posterKind = new URLSearchParams(location.search).get('poster');
+if (posterKind) posterMode(posterKind === 'strip' ? 'strip' : 'oak');
+else {
+  buildPicker();
+  buildTrees();
+  resize();
+  requestAnimationFrame(frame);
+}

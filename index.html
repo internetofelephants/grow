@@ -60,6 +60,13 @@
   .check input:checked::after { opacity: 1; }
   .check input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
+  /* poster mode (?poster=oak or ?poster=strip): only the art and a small bar to save it */
+  body.poster header, body.poster main, body.poster footer { display: none; }
+  body.poster { align-items: center; justify-content: center; background: #d9d4c8; }
+  .poster-art { width: min(96vw, calc((100vh - 70px) * 1.5)); height: auto; box-shadow: 0 2px 14px rgba(0,0,0,.18); }
+  .poster-bar { display: flex; gap: 14px; align-items: center; margin-top: 10px; font-size: 20px; }
+  .poster-bar a { color: var(--ink); }
+
   /* the fact shown when hovering over a tree */
   #tip {
     position: fixed; z-index: 5; max-width: 300px; pointer-events: none; box-sizing: border-box;

@@ -107,6 +107,12 @@ Instructions (simple how-to, written in `index.html`; it must never hint at whic
 tallest or lives longest), About (the authors' note, written in `index.html`), References (generated). Esc, ?, ✕ or a click outside
 closes it.
 
+**Poster mode.** `index.html?poster=oak` or `?poster=strip` hides the app and draws 3:2 concept art
+(3600×2400, laid out at 1500×1000 and drawn at 2.4×) with the app's own strokes: "Grow", a quiet 1 m/5 m
+grid, the ground, and a full-grown English oak (300 years) or a growth strip (`POSTER_AGES` 20, 60, 100,
+300 years) with labels. `drawPoster` swaps the global `ctx`/`dpr` to an offscreen canvas. A Save PNG
+button sits under the art (not in it). Exports are in `art/`.
+
 ## Running and testing
 - Start the preview with `preview_start` name `trees-dev`, or open `index.html` in a browser
   (the pane shows `file://` pages as static snapshots without scripts, so use the server there).
