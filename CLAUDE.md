@@ -38,6 +38,7 @@ others at the same fixed scale, and which outlive which. Repo: https://github.co
 - `trees.csv`: the spreadsheet of every value the simulation uses, with confidence; linked at the top of
   the References tab. **Generated**: after changing `SPECIES` or DATA.md's tree tables run
   `node tools/build_csv.js` (it also warns if DATA.md and main.js disagree).
+- `HISTORY.md`: the reviewed list of timeline facts (the copy in use is `HISTORY` in main.js).
 - `.claude/launch.json`: dev server `trees-dev` (`python3 -m http.server 8340`, `autoPort`).
 
 ## main.js layout (top to bottom)
@@ -46,7 +47,8 @@ utils → **species** (`SPECIES` table, `FACTS` hover text) → **growth** (`cur
 `scribble`, `tuft`, `weep`, `pcircle`) → **trees** (`drawBroad`, `drawConifer`, `drawPalm`, `drawTree`)
 → **the sheet** (grid, axis, ground, 1.75 m person for scale, `labelLines`/`labelRoom`/`drawLabel`) →
 **state** (`selected`, `buildTrees`, `maxYear`, `targetView`, `render`) → **controls** (picker, play,
-reset, speeds, scrub, "Let trees die", picker lock) → **information panel** → **hover facts** (`updateTip`,
+reset, speeds, scrub, "Let trees die", picker lock) → **information panel** → **history text** (`HISTORY` data near the top; `checkHistory`, `placeHistory`,
+`drawHistory` after `render`) → **hover facts** (`updateTip`,
 hit areas in `hits` from `render`) → `frame`.
 
 ## Systems
@@ -92,6 +94,13 @@ coconuts.
 tapping it shows a pencil-style card with its name and a 2–3 sentence fact from `FACTS`. Facts never
 mention height or lifespan or hint at which tree ends up biggest or oldest; each is sourced in DATA.md
 ("Tidbits"). The card is rechecked every frame, since trees grow under a still pointer.
+
+**History timeline.** While playing, each time the run passes a marker (every 25 years to 400, then every
+100 to 3,000) one of its 4 facts, picked at random, fades in (0.8 s), stays 4 s (3 s at 5×) and fades out (0.8 s): "25 years ago, ..." (counted from the
+current year using each fact's real year) or "About 500 years ago, ...". It's placed in the top-most free
+spot that no tree will reach before it fades (trees' size when it will have faded), shrinking or running as
+one line along the sky if needed; if nothing fits it's skipped. Only the latest passed marker waits while
+one is showing. Scrubbing and Reset clear it. The "Mute history" checkbox (under "Let trees die", default off) turns it off. Facts were checked against Wikipedia (not in References).
 
 **Information panel.** ? button (top right) or the `?` key opens "Information & guide" with three tabs:
 Instructions (simple how-to, written in `index.html`; it must never hint at which tree grows

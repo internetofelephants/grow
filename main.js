@@ -109,6 +109,66 @@ const FACTS = {
   parana: "It isn't a true pine but an araucaria, a relative of the monkey puzzle tree. Its seeds, pinhão, are a popular winter snack in southern Brazil, and are spread by animals, especially the azure jay. Logging and farming have destroyed about 97% of its habitat, and it is critically endangered.",
 };
 
+// ---------- history: as a run passes each marker, one of its facts fades in ("25 years ago, ...").
+// Markers every 25 years up to 400, then every 100 (eras, "About N years ago"). Exact facts carry their
+// year, so "N years ago" is counted from today. Each was checked; the reviewed list is in HISTORY.md.
+const HISTORY = [
+  [25, [[2001, 'Wikipedia went online'], [2001, 'Apple released the first iPod'], [2001, "Studio Ghibli's Spirited Away opened in Japan"], [2001, 'Beijing won the vote to host the 2008 Olympics']]],
+  [50, [[1976, 'Apple Computer was founded'], [1976, "Nadia Comăneci, aged 14, scored gymnastics' first perfect 10 at the Montreal Olympics"], [1976, 'the Soweto uprising against apartheid began in South Africa'], [1976, 'Concorde began flying passengers faster than sound']]],
+  [75, [[1951, 'the first Asian Games opened in New Delhi'], [1951, 'Libya became an independent country'], [1951, "Kurosawa's Rashomon won the top prize at the Venice Film Festival"], [1951, 'UNIVAC I, one of the first commercial computers, went to work for the US Census Bureau']]],
+  [100, [[1926, 'John Logie Baird gave the first public demonstration of television'], [1926, 'Hirohito became emperor of Japan'], [1926, 'Gertrude Ederle became the first woman to swim the English Channel'], [1926, 'Robert Goddard launched the first liquid-fuelled rocket']]],
+  [125, [[1901, 'the first Nobel Prizes were awarded'], [1901, "Australia's colonies joined to become one country"], [1901, 'Marconi received the first radio signal sent across the Atlantic'], [1901, 'the Boxer Protocol was signed, ending the Boxer Rebellion in China']]],
+  [150, [[1876, 'Alexander Graham Bell patented the telephone'], [1876, 'Lakota and Cheyenne warriors defeated Custer at the Little Bighorn'], [1876, "baseball's National League was founded"], [1876, 'the Ottoman Empire adopted its first constitution']]],
+  [175, [[1851, 'Moby-Dick was published'], [1851, 'the Taiping Rebellion began in China'], [1851, "Australia's first gold rush began"], [1851, "the yacht America won the race that became the America's Cup"]]],
+  [200, [[1826, 'Thomas Jefferson and John Adams both died on the 4th of July'], [1826, 'the Ottoman sultan crushed the Janissaries, his own elite troops'], [1826, 'the Treaty of Yandabo ended the first Anglo-Burmese war'], [1826, 'Simón Bolívar gathered the new Latin American republics at the Congress of Panama']]],
+  [225, [[1801, 'Ranjit Singh became Maharaja of the Punjab'], [1801, 'Joseph Jacquard showed his punch-card loom, an ancestor of the computer'], [1801, 'Toussaint Louverture gave Saint-Domingue, soon to be Haiti, a constitution'], [1801, 'Giuseppe Piazzi discovered Ceres, the first known asteroid']]],
+  [250, [[1776, 'the American colonies declared independence'], [1776, 'Adam Smith published The Wealth of Nations'], [1776, 'Spain created the Viceroyalty of the Río de la Plata in South America'], [1776, 'Ueda Akinari published the Japanese ghost stories Ugetsu Monogatari']]],
+  [275, [[1751, "the first volume of Diderot's Encyclopédie appeared"], [1751, 'Benjamin Franklin published his experiments with electricity'], [1751, "China's Qianlong Emperor visited Nanjing on his first grand tour of the south"], [1751, 'Carl Linnaeus, who gave plants their two-part Latin names, published Philosophia Botanica']]],
+  [300, [[1726, "Gulliver's Travels was published"], [1726, 'Montevideo was founded'], [1726, 'Isaac Newton told a friend how a falling apple set him thinking about gravity'], [1726, 'China printed the largest encyclopedia of its kind ever made: 800,000 pages, in copper movable type']]],
+  [325, [[1701, "a young lord attacked an official in the shogun's castle, starting the story of the 47 rōnin"], [1701, 'the Asante defeated Denkyira at Feyiase and became the leading Akan power'], [1701, 'New France, its First Nations allies and the Iroquois made the Great Peace of Montreal'], [1701, 'Jethro Tull invented the seed drill']]],
+  [350, [[1676, 'Antonie van Leeuwenhoek first saw microorganisms through his microscope'], [1676, 'Ole Rømer made the first measurement of the speed of light'], [1676, "rebels in Bacon's Rebellion burned Jamestown, Virginia"], [1676, 'Feodor III became Tsar of Russia']]],
+  [375, [[1651, 'Thomas Hobbes published Leviathan'], [1651, 'after losing a battle, the future Charles II of England hid from his enemies in an oak tree'], [1651, 'Tokugawa Ietsuna became shogun of Japan'], [1651, 'Kösem Sultan, one of the most powerful women in Ottoman history, was assassinated']]],
+  [400, [[1626, 'Dutch colonists bought Manhattan from the Lenape'], [1626, "St Peter's Basilica in Rome was consecrated"], [1626, 'Nurhaci, founder of the Qing dynasty, died'], [1626, 'Francis Bacon died, said to have caught a fatal chill stuffing a chicken with snow']]],
+  [500, ['Babur won the battle of Panipat and founded the Mughal Empire', 'the Ottomans defeated Hungary at Mohács', 'the Inca Empire was at its greatest extent, under Huayna Capac', 'William Tyndale printed the New Testament in English']],
+  [600, ["Admiral Zheng He's treasure fleets sailed from China as far as East Africa", 'the Aztec Triple Alliance was formed', 'Joan of Arc led the French army', "King Sejong's Korea saw great advances in science and invention"]],
+  [700, ['Ibn Battuta set out on travels across Africa and Asia that lasted 30 years', 'Mansa Musa of Mali made his famously rich pilgrimage to Mecca', "the Mexica founded Tenochtitlan, today's Mexico City", 'Dante finished the Divine Comedy']],
+  [800, ['Genghis Khan, founder of the Mongol Empire, died', "England's barons forced King John to seal Magna Carta", 'Sundiata Keita founded the Mali Empire', "Great Zimbabwe's stone walls were rising in southern Africa"]],
+  [900, ['the Song dynasty lost its capital Kaifeng to the Jin', 'Angkor Wat was being built in Cambodia', 'the Persian poet and mathematician Omar Khayyam was alive', "Chaco Canyon's great houses were at their peak in what is now New Mexico"]],
+  [1000, ['Murasaki Shikibu had just written The Tale of Genji', "Leif Erikson's Norse sailors had reached North America", 'Ibn Sina finished The Canon of Medicine', 'the Chola navy of southern India attacked the Srivijaya empire']],
+  [1100, ['the Khitan Liao conquered the kingdom of Balhae', 'Æthelstan became the first king of all England', 'Córdoba in Muslim Spain was becoming one of Europe\'s largest cities', 'Chichen Itza was rising in the Yucatán']],
+  [1200, ['al-Khwarizmi wrote the book that gave us the word "algebra"', 'Borobudur was being built in Java', 'Jayavarman II founded the Khmer Empire', 'Charlemagne had been crowned emperor in Rome']],
+  [1300, ['the poet Li Bai was writing in Tang China', "Japan's oldest chronicle, the Kojiki, had just been written", 'the Franks stopped an Umayyad army at the battle of Tours', 'the Maya city of Tikal was at its height']],
+  [1400, ['Muhammad and his followers had moved to Medina', 'Emperor Taizong took the throne of Tang China', 'Pakal the Great ruled the Maya city of Palenque', "Prince Shōtoku had written Japan's Seventeen-Article Constitution"]],
+  [1500, ['Hagia Sophia was about to be built in Constantinople', 'King Kaleb of Aksum sent an army across the Red Sea to Yemen', 'the Indian mathematician Aryabhata had just written his great work on astronomy', 'Buddhism was about to reach Japan']],
+  [1600, ["Attila's Huns were about to sweep across Europe", 'Teotihuacan was the largest city in the Americas', 'the poet Kalidasa was writing in Gupta India', 'the great university at Nalanda in India was founded']],
+  [1700, ['Constantine was founding Constantinople', 'King Ezana of Aksum became a Christian', 'the Gupta Empire had just been founded in India', 'Wang Xizhi, China\'s "sage of calligraphy", was born']],
+  [1800, ['the Sasanian Empire was founded in Persia', 'China was split into the Three Kingdoms', 'Queen Himiko ruled in Japan', 'the Moche were building great adobe pyramids in Peru']],
+  [1900, ['the Pantheon was rebuilt in Rome', 'Cai Lun had improved papermaking in China', 'Zhang Heng built the first seismoscope to detect earthquakes', 'Kanishka ruled the Kushan Empire across Central Asia and India']],
+  [2000, ['the Han dynasty had just been restored in China', 'Jesus was preaching in Galilee', 'the Nabataeans were carving the city of Petra into rock', 'the Nazca were drawing giant lines in the Peruvian desert']],
+  [2100, ['the Silk Road had recently opened, linking Han China with Central Asia and the West', 'Julius Caesar was a young man in Rome', 'Sima Qian had written the first great history of China', 'Cleopatra was about to be born']],
+  [2200, ['the Rosetta Stone had just been carved', 'Hannibal had crossed the Alps with war elephants', "China's first emperor had been buried with his Terracotta Army", 'Archimedes had been killed at Syracuse']],
+  [2300, ["Ashoka was about to rule India's Maurya Empire", 'the Library of Alexandria had just been founded', 'the Colossus of Rhodes was standing', "Euclid had written the Elements"]],
+  [2400, ['Plato was teaching at his Academy in Athens', 'the philosopher Mencius was born in China', 'Alexander the Great was about to be born', 'the Mausoleum at Halicarnassus was about to be built, giving us the word "mausoleum"']],
+  [2500, ['Confucius had just died', 'the Buddha was teaching in India (his dates are debated)', 'the Spartans had made their stand at Thermopylae', 'the Nok culture of Nigeria was making terracotta sculptures']],
+  [2600, ["Babylon's Ishtar Gate was built", 'Cyrus the Great was about to found the Persian Empire', 'Aesop was telling his fables', 'the Olmec city of La Venta was thriving in Mexico']],
+  [2700, ["Japan's legendary first emperor, Jimmu, is said to have taken the throne", 'King Ashurbanipal was building his great library at Nineveh', 'the first coins were being made in Lydia', 'Kushite pharaohs from Nubia ruled Egypt']],
+  [2800, ['the first Olympic Games were held', 'Rome was about to be founded, according to legend', "Homer's Iliad was taking shape", "China's Zhou kings moved their capital east"]],
+  [2900, ['the Phoenicians were about to found Carthage', 'King Ashurnasirpal II of Assyria built a new capital at Nimrud', 'the temple of Chavín de Huántar was a great religious centre in Peru', 'the kingdom of Israel had just split in two']],
+  [3000, ['the Phoenician alphabet, ancestor of the Greek, Latin, Hebrew and Arabic alphabets, was spreading', 'the Zhou dynasty ruled China', 'the Lapita people were settling Fiji, Tonga and Samoa', 'King Solomon was said to rule Israel']],
+];
+const THIS_YEAR = new Date().getFullYear();
+
+// The text for one marker, picked at random: "25 years ago, Wikipedia went online."
+function historyText(ago) {
+  const facts = HISTORY.find(m => m[0] === ago)[1];
+  const f = facts[Math.floor(Math.random() * facts.length)];
+  if (Array.isArray(f)) {
+    const n = THIS_YEAR - f[0];
+    return { when: `${n.toLocaleString()} year${n === 1 ? '' : 's'} ago,`, what: f[1] + '.' };
+  }
+  return { when: `About ${ago.toLocaleString()} years ago,`, what: f + '.' };
+}
+
 // ---------- growth
 // Chapman-Richards style curve: 0 at birth, 0.5 at t50, levelling off at 1.
 function curve(age, t50, c) {
@@ -727,7 +787,84 @@ function render(dt) {
     const top = Math.min(gy - states[i].h * pxm - 12, gy - 70);   // the tree as drawn now, plus its label
     return { sp: tr.sp, x0: cx - colW / 2, x1: cx + colW / 2, y0: top, y1: H };
   });
+  drawHistory(dt, { x0, colW, T, gy, pxm, right: W - R });
   ctx.globalAlpha = 1;
+}
+
+// ---------- history text
+const HIST_IN = 0.8, HIST_OUT = 0.8;                  // seconds
+const histHold = () => (speed === 5 ? 3 : 4);          // time fully shown
+let hist = null, histPending = 0, histPrev = 0, muteHistory = false;
+
+// Note markers the run has just passed (only while playing, so scrubbing doesn't fire them).
+function checkHistory() {
+  if (year < histPrev) histPrev = year;                // restarted
+  if (playing && !muteHistory) for (const [ago] of HISTORY) if (ago > histPrev && ago <= year) histPending = ago;
+  histPrev = year;
+}
+function clearHistory() { hist = null; histPending = 0; histPrev = year; }
+
+// Lay the text out in the biggest free spot above the ground that no tree reaches before it fades.
+function placeHistory(text, g) {
+  const later = year + (HIST_IN + histHold() + HIST_OUT) * speed, pad = 10;
+  const boxes = trees.map((tr, i) => {
+    const st = stateAt(tr.sp, later), cx = g.x0 + g.colW * (i + 0.5);
+    const half = Math.max(st.cw * g.pxm / 2, st.d * g.pxm, 3) + pad;
+    return { x1: cx - half, x2: cx + half, y1: g.gy - st.h * g.pxm - pad };
+  });
+  const full = g.right - g.x0 - 16;
+  for (const size of [22, 19, 16, 14]) {
+    // a block ("25 years ago," then the fact) at a few widths, then the whole thing as one line,
+    // which can run along the strip of sky above the tallest tree
+    for (const [maxW, inline] of [[380, 0], [300, 0], [230, 0], [170, 0], [120, 0], [90, 0], [full, 1]]) {
+      const words = (inline ? text.when + ' ' + text.what : text.what).split(' ');
+      const lines = inline ? [] : [{ text: text.when, weight: 600 }];
+      ctx.font = `400 ${size}px Caveat, cursive`;
+      let row = '';
+      for (const word of words) {
+        const test = row ? row + ' ' + word : word;
+        if (row && ctx.measureText(test).width > maxW) { lines.push({ text: row, weight: 400 }); row = word; } else row = test;
+      }
+      lines.push({ text: row, weight: 400 });
+      const w = Math.max(...lines.map(l => { ctx.font = `${l.weight} ${size}px Caveat, cursive`; return ctx.measureText(l.text).width; }));
+      const lh = size * 1.1, h = lh * lines.length;
+      if (w > full) continue;
+      // top-most free spot first, then the one nearest the middle of the sheet
+      const mid = (g.x0 + g.right) / 2;
+      for (let y = g.T + 2; y + h < g.gy - 8; y += 4) {
+        let best = null;
+        for (let x = g.x0 + 8; x + w < g.right - 8; x += 6) {
+          if (boxes.some(b => x < b.x2 && x + w > b.x1 && y + h > b.y1)) continue;
+          if (best === null || Math.abs(x + w / 2 - mid) < Math.abs(best + w / 2 - mid)) best = x;
+        }
+        if (best !== null) return { lines, size, lh, x: best + w / 2, y };
+      }
+    }
+  }
+  return null;                                          // nowhere free: skip this one
+}
+
+function drawHistory(dt, g) {
+  if (!hist && histPending) {
+    const lay = placeHistory(historyText(histPending), g);
+    histPending = 0;
+    if (lay) hist = { ...lay, t: 0, hold: histHold() };
+  }
+  if (!hist) return;
+  hist.t += dt;
+  const t = hist.t;
+  const a = t < HIST_IN ? t / HIST_IN : t < HIST_IN + hist.hold ? 1 : 1 - (t - HIST_IN - hist.hold) / HIST_OUT;
+  if (a <= 0) { hist = null; return; }
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = INK;
+  hist.lines.forEach((l, i) => {
+    ctx.font = `${l.weight} ${hist.size}px Caveat, cursive`;
+    ctx.globalAlpha = a * (i ? 0.8 : 0.9);
+    ctx.fillText(l.text, hist.x, hist.y + i * hist.lh);
+  });
+  ctx.restore();
 }
 
 // ---------- controls
@@ -793,7 +930,7 @@ playBtn.onclick = () => {
   playBtn.blur();
 };
 // Reset clears the run (keeping the chosen trees) so new trees can be picked before playing again.
-$('#reset').onclick = e => { year = 0; setPlaying(false); e.target.blur(); };
+$('#reset').onclick = e => { year = 0; setPlaying(false); clearHistory(); e.target.blur(); };
 
 // Once a run has started (playing, paused or finished), the trees can't be changed until Reset:
 // adding a tree mid-run would show it fully grown and give the game away.
@@ -823,7 +960,7 @@ for (const s of SPEEDS) {
 
 scrub.addEventListener('pointerdown', () => { scrubbing = true; });
 window.addEventListener('pointerup', () => { scrubbing = false; });
-scrub.addEventListener('input', () => { year = +scrub.value; });
+scrub.addEventListener('input', () => { year = +scrub.value; clearHistory(); });
 
 window.addEventListener('keydown', e => {
   if (!guide.hidden) {
@@ -835,6 +972,7 @@ window.addEventListener('keydown', e => {
 });
 
 $('#letDie').addEventListener('change', e => { letDie = e.target.checked; });
+$('#muteHistory').addEventListener('change', e => { muteHistory = e.target.checked; if (muteHistory) clearHistory(); });
 
 // ---------- information & guide panel
 const guide = $('#guide'), helpBtn = $('#helpBtn');
@@ -901,6 +1039,7 @@ function frame(t) {
     year += dt * speed;
     if (year >= maxYear()) { year = maxYear(); setPlaying(false); }
   }
+  checkHistory();
   render(dt);
   updateTip();                          // trees grow under a still pointer, so check every frame
   const y = Math.floor(year);

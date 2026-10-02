@@ -49,6 +49,7 @@
   .note { font-size: 17px; color: var(--soft); }
 
   /* "Let trees die" checkbox: a hand-drawn box with a pencil tick */
+  .checks { display: flex; flex-direction: column; gap: 2px; }
   .check { display: inline-flex; align-items: center; gap: 6px; font-size: 20px; cursor: pointer; user-select: none; }
   .check input {
     -webkit-appearance: none; appearance: none; margin: 0; width: 17px; height: 17px; cursor: pointer;
@@ -110,7 +111,10 @@
   <div id="speeds"></div>
   <span id="year">0 years</span>
   <input type="range" id="scrub" min="0" max="100" step="1" value="0" aria-label="Year">
-  <label class="check"><input type="checkbox" id="letDie" checked> Let trees die</label>
+  <div class="checks">
+    <label class="check"><input type="checkbox" id="letDie" checked> Let trees die</label>
+    <label class="check"><input type="checkbox" id="muteHistory"> Mute history</label>
+  </div>
   <span class="note">typical values from forestry sources</span>
 </footer>
 <div id="guide" hidden>
